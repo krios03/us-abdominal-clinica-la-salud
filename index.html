@@ -32,7 +32,7 @@ input,textarea,button{-webkit-user-select:text;user-select:text}
 .header-center{flex:1;text-align:center;line-height:1.15}
 .header-center h2{margin:0;color:#123c76;font-size:13px}
 .header-center p{margin:1px 0;font-size:11px}
-.section-title{margin:0 0 4px;font-size:17px;font-weight:700}
+.section-title{margin:0 0 4px;font-size:17px;font-weight:700;text-align:center}
 .form-hint{margin:0 0 8px;font-size:12px;color:#5a7a8a;font-style:italic;text-align:center}
 .subsection{margin:6px 0 2px;font-size:14px;font-weight:700;color:#123c76}
 .field-line{display:flex;align-items:flex-end;gap:6px;margin:4px 0;min-height:42px}
@@ -853,7 +853,7 @@ async function generatePdfBlob(){
   pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(10);
   pdf.text("Médico Ultrasonografista: Dra. Mariana López",pw/2,y+26,{align:"center"});
   pdf.text("B. El Centro, Siguatepeque, Comayagua · Tel: 9645-1203",pw/2,y+39,{align:"center"});
-  y+=58;pdf.setFont("times","bold");pdf.setFontSize(15);pdf.text("Reporte de Ultrasonido Abdominal",L,y);y+=12;
+  y+=58;pdf.setFont("times","bold");pdf.setFontSize(15);pdf.text("Reporte de Ultrasonido Abdominal",pw/2,y,{align:"center"});y+=12;
   const lineField=(label,value,x,w)=>{
     pdf.setTextColor(17,17,17);pdf.setFont("times","bold");pdf.setFontSize(10);pdf.text(`${label}:`,x,y+10);
     const labelW=pdf.getTextWidth(`${label}: `),lx=x+labelW+3;pdf.setLineWidth(.5);pdf.line(lx,y+13,x+w,y+13);
