@@ -852,13 +852,13 @@ async function generatePdfBlob(){
     ["Páncreas",data.pancreas||""],["Riñones",data.rinones||""],["Bazo",data.bazo||""],
     ["Vejiga",data.vejiga||""],["Dx",data.dx||""],["Conclusión",data.conclusion||""]
   ];
-  const headerHeight=58+12+20+20,footerHeight=14,sectionGap=4,titleHeight=10,boxPadY=8,minBox=18;
+  const headerHeight=58+12+20+20,footerHeight=14,sectionGap=5,titleHeight=14,boxPadY=14,minBox=24;
   const available=B-24-headerHeight-footerHeight;
   function measureLayout(fontSize){
     pdf.setFont("times","normal");pdf.setFontSize(fontSize);
-    const lineHeight=fontSize+1.5;
+    const lineHeight=fontSize+1.7;
     const measured=sections.map(([title,value])=>{
-      const lines=splitMulti(pdf,value,contentW-7);
+      const lines=splitMulti(pdf,value,contentW-18);
       const boxHeight=Math.max(minBox,lines.length*lineHeight+boxPadY);
       return {title,value,lines,boxHeight}
     });
@@ -877,24 +877,27 @@ async function generatePdfBlob(){
   pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(10);
   pdf.text("Médico Ultrasonografista: Dra. Mariana López",pw/2,y+26,{align:"center"});
   pdf.text("B. El Centro, Siguatepeque, Comayagua · Tel: 9645-1203",pw/2,y+39,{align:"center"});
+  pdf.setDrawColor(184,211,222);pdf.setLineWidth(.8);pdf.line(L,y+51,R,y+51);
   y+=58;pdf.setFont("times","bold");pdf.setFontSize(15);pdf.text("Reporte de Ultrasonido Abdominal",pw/2,y,{align:"center"});y+=12;
   const lineField=(label,value,x,w)=>{
-    pdf.setTextColor(17,17,17);pdf.setFont("times","bold");pdf.setFontSize(10);pdf.text(`${label}:`,x,y+10);
-    const labelW=pdf.getTextWidth(`${label}: `),lx=x+labelW+3;pdf.setLineWidth(.5);pdf.line(lx,y+13,x+w,y+13);
+    pdf.setFillColor(247,251,253);pdf.setDrawColor(203,220,227);pdf.roundedRect(x,y,w,16,2,2,"FD");
+    pdf.setTextColor(18,72,91);pdf.setFont("times","bold");pdf.setFontSize(9.5);pdf.text(`${label}:`,x+5,y+11);
+    const labelW=pdf.getTextWidth(`${label}: `),lx=x+labelW+8;
     pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(12);
-    const t=fitLine(pdf,value,(x+w)-lx-3);if(t)pdf.text(t,lx+2,y+10)
+    const t=fitLine(pdf,value,(x+w)-lx-5);if(t)pdf.text(t,lx,y+11)
   };
   lineField("Nombre",data.nombre,L,R-L);y+=20;
   lineField("Edad",data.edad||"",L,110);lineField("Fecha",data.fecha||"",L+130,150);y+=20;
   const drawBlock=(section)=>{
     const {title,lines,boxHeight}=section;
-    pdf.setTextColor(18,60,118);pdf.setFont("times","bold");pdf.setFontSize(10.5);pdf.text(title,L,y+9);
-    y+=titleHeight;const top=y;pdf.setDrawColor(34,34,34);pdf.setLineWidth(.45);pdf.rect(L,top,contentW,boxHeight);
+    pdf.setTextColor(18,72,91);pdf.setFont("times","bold");pdf.setFontSize(10.5);pdf.text(title,L,y+9);
+    y+=titleHeight;const top=y;pdf.setFillColor(250,253,254);pdf.setDrawColor(196,217,225);pdf.setLineWidth(.55);pdf.roundedRect(L,top,contentW,boxHeight,3,3,"FD");
+    pdf.setFillColor(21,94,117);pdf.rect(L,top,3,boxHeight,"F");
     pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(layout.fontSize);
     const maxLines=Math.max(1,Math.floor((boxHeight-boxPadY)/layout.lineHeight));
     const visible=lines.length>maxLines?lines.slice(0,maxLines):lines;
-    if(lines.length>maxLines)visible[maxLines-1]=fitLine(pdf,visible[maxLines-1],contentW-7);
-    visible.forEach((line,i)=>pdf.text(line,L+4,top+layout.fontSize+i*layout.lineHeight));
+    if(lines.length>maxLines)visible[maxLines-1]=fitLine(pdf,visible[maxLines-1],contentW-18);
+    visible.forEach((line,i)=>pdf.text(line,L+9,top+9+layout.fontSize+i*layout.lineHeight));
     y=top+boxHeight+sectionGap
   };
   layout.measured.forEach(drawBlock);
