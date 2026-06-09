@@ -231,9 +231,9 @@ body.keyboard-open .modal-body{padding-bottom:18px}
         </div>
         <div class="field-line">
           <label>Edad:</label>
-          <input type="text" data-field="edad" placeholder="Edad" autocomplete="off" style="max-width:100px">
+          <input type="text" data-field="edad" placeholder="Edad" autocomplete="off" style="max-width:70px">
           <label style="min-width:45px">Fecha:</label>
-          <input type="text" data-field="fecha" placeholder="DD/MM/AAAA" autocomplete="off" style="flex:1">
+          <input type="text" data-field="fecha" placeholder="DD/MM/AAAA" autocomplete="off" style="max-width:145px">
           <button class="btn-today" id="btnFechaHoy">Hoy</button>
         </div>
 
@@ -836,6 +836,7 @@ function buildFileName(){
 }
 function fitLine(pdf,text,maxW){const s=String(text||"").trim();if(!s)return"";let o=s;while(pdf.getTextWidth(o)>maxW&&o.length>1)o=`${o.slice(0,-2)}…`;return o}
 function splitMulti(pdf,text,maxW){const s=String(text||"").trim();return s?pdf.splitTextToSize(s,maxW):[]}
+function fitMulti(pdf,text,maxW,maxLines){const lines=splitMulti(pdf,text,maxW);if(lines.length<=maxLines)return lines;const clipped=lines.slice(0,maxLines);clipped[maxLines-1]=fitLine(pdf,clipped[maxLines-1],maxW);return clipped}
 function optimizeLogo(imgEl,q=.42){
   if(!imgEl||!imgEl.src)return null;const sw=Math.max(1,imgEl.naturalWidth||200),sh=Math.max(1,imgEl.naturalHeight||200);
   const s=Math.min(1,260/Math.max(sw,sh));const w=Math.max(1,Math.round(sw*s)),h=Math.max(1,Math.round(sh*s));
@@ -845,51 +846,40 @@ function optimizeLogo(imgEl,q=.42){
 async function generatePdfBlob(){
   const data=getFormData();const{jsPDF}=window.jspdf;
   const pdf=new jsPDF({orientation:"portrait",unit:"pt",format:"letter",compress:true,putOnlyUsedFonts:true});
-  const pw=612,ph=792,L=28,R=pw-28,B=ph-34;let y=28;
+  const pw=612,ph=792,L=24,R=pw-24,B=ph-24;let y=24;
   const lL=optimizeLogo(el.logoLeft,.42),lR=optimizeLogo(el.logoRight,.38);
-  const addPageIfNeeded=(need)=>{if(y+need<=B)return;pdf.addPage();y=34};
-  const drawHeader=()=>{
-    if(lL)pdf.addImage(lL,"JPEG",L,y,64,64,undefined,"FAST");if(lR)pdf.addImage(lR,"JPEG",R-54,y,54,64,undefined,"FAST");
-    pdf.setTextColor(18,60,118);pdf.setFont("times","bold");pdf.setFontSize(17);pdf.text("Clínica Médica La Salud",pw/2,y+16,{align:"center"});
+  if(lL)pdf.addImage(lL,"JPEG",L,y,46,46,undefined,"FAST");if(lR)pdf.addImage(lR,"JPEG",R-42,y,42,46,undefined,"FAST");
+  pdf.setTextColor(18,60,118);pdf.setFont("times","bold");pdf.setFontSize(15);pdf.text("Clínica Médica La Salud",pw/2,y+12,{align:"center"});
+  pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(10);
+  pdf.text("Médico Ultrasonografista: Dra. Mariana López",pw/2,y+26,{align:"center"});
+  pdf.text("B. El Centro, Siguatepeque, Comayagua · Tel: 9645-1203",pw/2,y+39,{align:"center"});
+  y+=58;pdf.setFont("times","bold");pdf.setFontSize(15);pdf.text("Reporte de Ultrasonido Abdominal",L,y);y+=12;
+  const lineField=(label,value,x,w)=>{
+    pdf.setTextColor(17,17,17);pdf.setFont("times","bold");pdf.setFontSize(10);pdf.text(`${label}:`,x,y+10);
+    const labelW=pdf.getTextWidth(`${label}: `),lx=x+labelW+3;pdf.setLineWidth(.5);pdf.line(lx,y+13,x+w,y+13);
     pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(12);
-    pdf.text("Médico Ultrasonografista: Dra. Mariana López",pw/2,y+33,{align:"center"});
-    pdf.text("B. El Centro, Siguatepeque, Comayagua",pw/2,y+48,{align:"center"});pdf.text("Tel: 9645-1203",pw/2,y+63,{align:"center"});
-    y+=90;pdf.setFont("times","bold");pdf.setFontSize(18);pdf.text("Reporte de Ultrasonido Abdominal",L,y);y+=14
+    const t=fitLine(pdf,value,(x+w)-lx-3);if(t)pdf.text(t,lx+2,y+10)
   };
-  const drawFooter=()=>{
-    const pages=pdf.getNumberOfPages();
-    for(let i=1;i<=pages;i++){pdf.setPage(i);pdf.setFont("times","normal");pdf.setFontSize(9);pdf.setTextColor(90,90,90);pdf.text(`Página ${i} de ${pages}`,R,ph-18,{align:"right"})}
+  lineField("Nombre",data.nombre,L,R-L);y+=20;
+  lineField("Edad",data.edad||"",L,110);lineField("Fecha",data.fecha||"",L+130,150);y+=20;
+  const drawBlock=(title,value,height,maxLines,fontSize=8.6)=>{
+    pdf.setTextColor(18,60,118);pdf.setFont("times","bold");pdf.setFontSize(10.5);pdf.text(title,L,y+9);
+    y+=11;const top=y;pdf.setDrawColor(34,34,34);pdf.setLineWidth(.45);pdf.rect(L,top,R-L,height);
+    pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(fontSize);
+    const lines=fitMulti(pdf,value,R-L-7,maxLines);const lh=fontSize+2;
+    lines.forEach((line,i)=>pdf.text(line,L+4,top+10+i*lh));
+    y=top+height+5
   };
-  const drawLL=(label,value)=>{addPageIfNeeded(30);pdf.setTextColor(17,17,17);pdf.setFont("times","bold");pdf.setFontSize(13);pdf.text(`${label}:`,L,y+13);const lx=L+95;pdf.setLineWidth(.8);pdf.line(lx,y+17,R,y+17);pdf.setFont("times","normal");pdf.setFontSize(12);const t=fitLine(pdf,value,R-lx-6);if(t)pdf.text(t,lx+3,y+13);y+=30};
-  const drawBlock=(title,value,minLines=2)=>{
-    pdf.setFont("times","normal");pdf.setFontSize(12);
-    const textLines=splitMulti(pdf,value,R-L-8);
-    const lineHeight=14;
-    let idx=0,first=true;
-    do{
-      addPageIfNeeded(24+(minLines*lineHeight)+14);
-      const heading=first?title:`${title} (cont.)`;
-      pdf.setTextColor(18,60,118);pdf.setFont("times","bold");pdf.setFontSize(14);pdf.text(heading,L,y+12);y+=18;
-      const available=Math.max(minLines,Math.floor((B-y-18)/lineHeight));
-      const remaining=textLines.length-idx;
-      const take=remaining>0?Math.min(remaining,available):0;
-      const boxLines=Math.max(minLines,take||1);
-      const boxHeight=boxLines*lineHeight+8,top=y;
-      pdf.setDrawColor(34,34,34);pdf.setLineWidth(.6);pdf.rect(L,top,R-L,boxHeight);
-      pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(12);
-      textLines.slice(idx,idx+take).forEach((line,i)=>pdf.text(line,L+4,top+15+i*lineHeight));
-      idx+=take;y=top+boxHeight+10;first=false;
-      if(idx<textLines.length)addPageIfNeeded(B)
-    }while(idx<textLines.length)
-  };
-  drawHeader();
-  drawLL("Nombre",data.nombre);drawLL("Edad",data.edad||"");drawLL("Fecha",data.fecha||"");
-  drawBlock("Indicación",data.indicacion||"",2);
-  drawBlock("Hígado",data.higado||"",2);drawBlock("Vesícula Biliar",data.vesicula||"",2);
-  drawBlock("Páncreas",data.pancreas||"",2);drawBlock("Riñones",data.rinones||"",3);
-  drawBlock("Bazo",data.bazo||"",2);drawBlock("Vejiga",data.vejiga||"",2);
-  drawBlock("Dx",data.dx||"",2);drawBlock("Conclusión",data.conclusion||"",2);
-  drawFooter();
+  drawBlock("Indicación",data.indicacion||"",36,3);
+  drawBlock("Hígado",data.higado||"",58,5);
+  drawBlock("Vesícula Biliar",data.vesicula||"",52,5);
+  drawBlock("Páncreas",data.pancreas||"",48,4);
+  drawBlock("Riñones",data.rinones||"",66,6);
+  drawBlock("Bazo",data.bazo||"",42,4);
+  drawBlock("Vejiga",data.vejiga||"",42,4);
+  drawBlock("Dx",data.dx||"",54,5);
+  drawBlock("Conclusión",data.conclusion||"",58,5);
+  pdf.setFont("times","normal");pdf.setFontSize(8);pdf.setTextColor(90,90,90);pdf.text("Página 1 de 1",R,ph-14,{align:"right"});
   return pdf.output("blob")
 }
 async function exportPdfToDownload(){
