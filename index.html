@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>US Abdominal - Clínica La Salud</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Atkinson+Hyperlegible+Next:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{--bg:#edf4f6;--panel:#fff;--ink:#1d232b;--muted:#4f5d6e;--brand:#155e75;--brand-dark:#0e485b;--ok:#20603d;--warn:#8a5a00;--danger:#8f1d1d;--line:#222}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:"Atkinson Hyperlegible Next",sans-serif;background:var(--bg);color:var(--ink);-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+input,textarea,button{-webkit-user-select:text;user-select:text}
+.app-shell{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+.app-bar{background:linear-gradient(90deg,#e7f1f4,#ffffff);border-bottom:1px solid #c8d8df;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:40;flex-shrink:0;min-height:56px;box-shadow:0 4px 16px rgba(21,94,117,.08)}
+.app-title{min-width:0;display:flex;flex-direction:column;gap:3px}
+.app-bar h1{font-size:.95rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--brand-dark)}
+.app-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.autosave-status,.progress-status{font-size:.72rem;color:#2d5c6e;background:#e8f3f8;border:1px solid #bdd4df;border-radius:999px;padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:48vw}
+.progress-status{background:#eef8ef;border-color:#bfd9c6;color:#24583d}
+.app-bar-actions{display:flex;gap:6px;flex-shrink:0;overflow-x:auto;max-width:100%;padding-bottom:1px}
+.layout{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.report-container{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;background:#dce5e8;padding:6px}
+.report-page{width:100%;max-width:8.5in;background:#fff;margin:0 auto;padding:14px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-family:"Source Serif 4",serif;color:#111;border-radius:4px}
+.report-header{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.logo-box{width:50px;height:50px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.logo-box:last-child{width:55px;height:50px}
+.logo-box img{max-width:100%;max-height:100%;object-fit:contain;object-position:center}
+.header-center{flex:1;text-align:center;line-height:1.15}
+.header-center h2{margin:0;color:#123c76;font-size:13px}
+.header-center p{margin:1px 0;font-size:11px}
+.section-title{margin:0 0 4px;font-size:17px;font-weight:700}
+.form-hint{margin:0 0 8px;font-size:12px;color:#5a7a8a;font-style:italic;text-align:center}
+.subsection{margin:6px 0 2px;font-size:14px;font-weight:700;color:#123c76}
+.field-line{display:flex;align-items:flex-end;gap:6px;margin:4px 0;min-height:42px}
+.field-line label{min-width:75px;font-size:14px;font-weight:700;flex-shrink:0}
+.field-line input{flex:1;border:none;border-bottom:2px solid var(--line);border-radius:0;padding:4px 3px 8px;font-size:16px;height:40px;line-height:1.35;font-family:"Source Serif 4",serif;background:transparent;min-width:0;overflow:visible}
+.field-block{border-bottom:2px solid #222;min-height:60px;margin-bottom:6px}
+.field-block textarea{border:none;border-radius:0;resize:none;width:100%;min-height:56px;padding:6px 3px;font-size:16px;font-family:"Source Serif 4",serif;line-height:1.3;background:transparent}
+.active-target{outline:3px solid #79bdd4;outline-offset:3px;background:#f1fbff!important;border-radius:3px}
+.btn{border:1.5px solid #9fb3bf;background:#f7fbfd;color:#123;padding:10px 12px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-family:"Atkinson Hyperlegible Next",sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;white-space:nowrap;transition:transform .1s,filter .1s,box-shadow .1s;flex-shrink:0}
+.btn:active{filter:brightness(.92);transform:scale(.96)}
+.btn.small{padding:8px 10px;min-height:36px;font-size:.8rem;border-radius:8px}
+.btn.primary{background:#dbf0f8;border-color:#75acc3}
+.btn.success{background:#daf3e5;border-color:#74ae8c}
+.btn.warn{background:#fdeecf;border-color:#d5a453}
+.btn.danger{background:#f8dede;border-color:#cc7f7f}
+.btn.ghost{background:#fff}
+.btn.close{background:#f0f0f0;border-color:#ccc;font-size:1.2rem;padding:6px 12px;min-height:38px}
+.btn-today{background:#e8f4fd;border-color:#6aaac8;font-size:.75rem;padding:4px 10px;min-height:30px;border-radius:8px;flex-shrink:0}
+.btn:disabled{opacity:.45;pointer-events:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #7ac3d6;outline-offset:2px}
+@keyframes recPulse{0%{box-shadow:0 0 0 0 rgba(191,31,31,.45)}70%{box-shadow:0 0 0 12px rgba(191,31,31,0)}100%{box-shadow:0 0 0 0 rgba(191,31,31,0)}}
+#btnStartVoice.is-recording{background:#f9dede;border-color:#be2d2d;color:#7d0f0f;animation:recPulse 1.25s infinite}
+#btnStartVoice.is-recording::before{content:"\25CF";color:#d31414;margin-right:6px;font-size:.8rem}
+.modal-sheet.is-recording{border:2px solid #d25a5a}
+.modal-sheet.is-recording .modal-header{background:linear-gradient(90deg,#fde7e7,#f7eef0)}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:8px 8px max(8px,env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .25s;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.modal-backdrop.open{opacity:1;pointer-events:auto}
+.modal-sheet{background:var(--panel);width:100%;max-width:560px;max-height:calc(100dvh - 16px);border-radius:18px;display:flex;flex-direction:column;box-shadow:0 -8px 30px rgba(0,0,0,.2);transform:translateY(-14px);transition:transform .3s cubic-bezier(.32,.72,0,1);overflow:hidden;margin:0 auto}
+.modal-backdrop.open .modal-sheet{transform:translateY(0)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #d7e1e6;background:#f0f5f8;flex-shrink:0}
+.modal-header h2{margin:0;font-size:1.05rem;font-weight:700;color:var(--brand)}
+.modal-body{padding:12px 14px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;display:flex;flex-direction:column;gap:8px}
+body.keyboard-open .modal-backdrop{align-items:flex-start;padding-bottom:8px}
+body.keyboard-open .modal-sheet{max-height:calc(var(--visual-vh, 100dvh) - 12px);transform:translateY(0)}
+body.keyboard-open .modal-body{padding-bottom:18px}
+.modal-body .status-inline{font-size:.82rem;padding:8px 10px;border-radius:8px;border-left:4px solid var(--brand);background:#e9f4f9;font-weight:600}
+.modal-body textarea{width:100%;border:1px solid #bacad4;border-radius:10px;padding:10px;font-size:1rem;font-family:"Atkinson Hyperlegible Next",sans-serif;resize:vertical}
+.transcript-box{min-height:80px}
+.ai-box{min-height:80px;font-size:.9rem!important}
+.modal-body .review-panel{border:1px solid #d7e1e6;border-radius:10px;padding:8px 10px;background:#fafcfd}
+.modal-body .review-panel h4{margin:0 0 4px;font-size:.85rem}
+.dictation-sheet{max-width:min(980px,calc(100vw - 20px));height:calc(100dvh - 20px)}
+.dictation-sheet .modal-header{padding:16px 20px}
+.dictation-sheet .modal-header h2{font-size:1.45rem}
+.dictation-sheet .modal-body{padding:16px 20px;gap:14px}
+.dictation-sheet .status-inline{font-size:1.05rem;line-height:1.35;padding:12px 14px}
+.dictation-workspace{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:14px;min-height:0;flex:1}
+.dictation-main{display:flex;flex-direction:column;gap:10px;min-height:0}
+.dictation-label{font-size:1rem;font-weight:800;color:var(--brand-dark)}
+.dictation-main .transcript-box{flex:1;min-height:320px;font-size:1.35rem;line-height:1.55;padding:16px;border:2px solid #9dc4d1;border-radius:8px;background:#fbfeff;color:#121820}
+.dictation-actions{display:grid;grid-template-columns:1fr;align-content:start;gap:10px}
+.dictation-actions .btn{width:100%;min-height:58px;font-size:1.05rem;justify-content:center}
+.dictation-actions #btnInsertTranscript{min-height:68px;font-size:1.12rem}
+.dictation-sheet .review-panel{padding:10px;border-radius:8px}
+.dictation-sheet .review-panel h4{font-size:.95rem;margin-bottom:6px}
+.dictation-sheet .review-panel .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dictation-sheet .ai-box{min-height:74px;max-height:120px;font-size:.95rem!important;line-height:1.35}
+.dictation-sheet .review-panel.is-prominent{border:3px solid #2b7f9a;background:#f2fbfd;box-shadow:0 0 0 4px rgba(43,127,154,.14)}
+.dictation-sheet .review-panel.is-prominent h4{font-size:1.25rem;color:#0e485b}
+.dictation-sheet .review-panel.is-prominent .ai-box{min-height:220px;max-height:none;font-size:1.2rem!important;line-height:1.55;border:2px solid #8bbccc;background:#fff}
+.dictation-sheet .review-panel.is-prominent .btn{min-height:52px;font-size:1rem}
+.history-toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.history-toolbar input{flex:1;min-width:220px;border:1px solid #bacad4;border-radius:8px;padding:9px 10px;font-size:.92rem;font-family:"Atkinson Hyperlegible Next",sans-serif}
+.history-list{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.history-item{border:1px solid #d5e0e6;border-radius:10px;padding:10px;background:#fafdff}
+.history-title{font-weight:700;font-size:.95rem;color:#1d3f64}
+.history-meta{font-size:.78rem;color:#4f5d6e;margin:2px 0 6px}
+.history-badges{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}
+.history-badge{border:1px solid #cbdbe3;border-radius:999px;background:#eef6f9;color:#255063;font-size:.72rem;font-weight:700;padding:3px 7px}
+.history-preview{font-size:.82rem;color:#23323e;background:#f3f8fb;border:1px dashed #c7d8e1;border-radius:8px;padding:8px;margin-bottom:8px;max-height:72px;overflow:hidden}
+.history-actions{display:flex;gap:6px;flex-wrap:wrap}
+.history-empty{border:1px dashed #c4d1d9;border-radius:10px;padding:12px;text-align:center;color:#546776;font-size:.88rem;background:#f8fbfd}
+.settings-group{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.settings-group h4{margin:0 0 2px;font-size:.9rem;color:var(--brand)}
+.settings-group label{font-size:.8rem;font-weight:600;color:#37414f;display:flex;flex-direction:column;gap:2px}
+.settings-group input[type="text"],.settings-group input[type="password"]{width:100%;border:1px solid #bacad4;border-radius:8px;padding:8px 10px;font-size:.88rem;font-family:"Atkinson Hyperlegible Next",sans-serif}
+.settings-note{margin:2px 0 0;font-size:.75rem;color:#5b6875;line-height:1.35}
+.logo-preview-box{width:50px;height:50px;display:flex;align-items:center;justify-content:center;border:1px solid #d7e1e6;border-radius:8px;overflow:hidden;background:#f7fbfd}
+.logo-preview-box img{max-width:100%;max-height:100%;object-fit:contain}
+.sidebar{display:none}
+.pdf-only{position:fixed;left:-9999px;top:0;box-shadow:none;border-radius:0}
+.pdf-render{width:8.5in!important;min-height:11in!important;max-width:none!important;padding:.32in .3in!important;border-radius:0!important;box-shadow:none!important}
+.pdf-render .report-header{display:grid!important;grid-template-columns:100px 1fr 90px!important}
+.pdf-render .logo-box{width:90px!important;height:90px!important}
+.pdf-render .header-center h2{font-size:16px!important}
+.pdf-render .header-center p{font-size:12px!important}
+.pdf-render .section-title{font-size:20px!important}
+.pdf-render .subsection{font-size:18px!important}
+.pdf-render .field-line label{font-size:14px!important;min-width:1.35in!important}
+.pdf-render .field-line{min-height:30px!important;margin:2px 0!important;align-items:flex-end!important}
+.pdf-render .field-line input{font-size:14px!important;height:30px!important;padding:3px 3px 7px!important;line-height:1.35!important;overflow:visible!important}
+.pdf-render .field-block textarea{font-size:13px!important;min-height:60px!important;overflow:visible!important;white-space:pre-wrap!important;word-wrap:break-word!important;height:auto!important}
+.pdf-render .field-block{min-height:.95in!important;overflow:visible!important;height:auto!important}
+.dictation-fab{position:fixed;right:14px;bottom:14px;z-index:50;box-shadow:0 10px 22px rgba(21,94,117,.24);display:none}
+.dictation-fab.visible{display:inline-flex}
+@media(min-width:1060px){
+.app-shell{max-width:1500px;margin:0 auto;padding:16px}
+.app-bar{border-radius:14px;margin-bottom:12px;padding:12px 18px}
+.app-bar h1{font-size:1.4rem}
+.autosave-status{font-size:.8rem;max-width:none}
+.layout{display:grid;grid-template-columns:1fr 280px;gap:14px;overflow:visible}
+.report-container{order:1;border-radius:14px;border:1px solid #c4d1d6;padding:12px}
+.sidebar{order:2;display:flex;flex-direction:column;gap:10px;position:sticky;top:72px;align-self:start}
+.sidebar-card{background:var(--panel);border-radius:14px;border:1px solid #d7e1e6;padding:14px;box-shadow:0 8px 20px rgba(0,0,0,.05)}
+.sidebar-card h3{margin:0 0 8px;font-size:1rem;color:var(--brand)}
+.sidebar-card .status-inline{font-size:.82rem;padding:8px 10px;border-radius:8px;border-left:4px solid var(--brand);background:#e9f4f9;font-weight:600}
+.summary-row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #e5edf1;padding:7px 0;font-size:.86rem}
+.summary-row:last-child{border-bottom:0}
+.summary-row span:first-child{color:var(--muted)}
+.summary-row span:last-child{font-weight:700;text-align:right}
+.report-page{width:8.5in;min-height:11in;max-width:none;padding:.32in .3in;box-shadow:0 12px 22px rgba(0,0,0,.12);border-radius:0}
+.report-header{display:grid;grid-template-columns:100px 1fr 90px}
+.logo-box{width:90px;height:90px}
+.logo-box:last-child{width:110px;height:90px}
+.header-center h2{font-size:16px}
+.header-center p{font-size:12px}
+.section-title{font-size:20px}
+.form-hint{font-size:13px}
+.subsection{font-size:18px}
+.field-line label{font-size:15px;min-width:1.35in}
+.field-line{min-height:36px;margin:3px 0}
+.field-line input{font-size:15px;height:34px;padding-bottom:7px;line-height:1.35}
+.field-block textarea{font-size:14px;min-height:60px}
+.field-block{min-height:.95in}
+.modal-backdrop{align-items:center}
+.modal-sheet{border-radius:18px;max-height:85vh;max-width:540px;transform:translateY(30px) scale(.97)}
+.modal-sheet.dictation-sheet{max-width:min(1120px,calc(100vw - 28px));height:calc(100dvh - 40px);max-height:none}
+.modal-backdrop.open .modal-sheet{transform:translateY(0) scale(1)}
+.dictation-fab{display:none!important}
+}
+@media(max-width:720px){
+.app-bar{align-items:flex-start;flex-direction:column}
+.app-title,.app-bar-actions{width:100%}
+.app-bar-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.app-bar-actions .btn{width:100%;padding-left:6px;padding-right:6px}
+.autosave-status,.progress-status{max-width:100%}
+.field-line{flex-wrap:wrap}
+.field-line label{min-width:auto}
+.field-line input{min-width:120px}
+.dictation-sheet{width:100%;max-width:none;height:calc(100dvh - 10px);max-height:none;border-radius:14px}
+.dictation-sheet .modal-header{padding:12px 14px}
+.dictation-sheet .modal-header h2{font-size:1.18rem}
+.dictation-sheet .modal-body{padding:12px;gap:10px}
+.dictation-sheet .status-inline{font-size:.95rem}
+.dictation-workspace{display:flex;flex-direction:column;gap:10px}
+.dictation-main .transcript-box{min-height:42dvh;font-size:1.2rem;line-height:1.5;padding:14px}
+.dictation-actions{grid-template-columns:1fr 1fr;gap:8px}
+.dictation-actions .btn{min-height:52px;font-size:.95rem}
+.dictation-actions #btnInsertTranscript{grid-column:1/-1;min-height:58px}
+.dictation-actions .review-panel{grid-column:1/-1}
+.dictation-sheet .ai-box{min-height:68px;max-height:96px}
+.dictation-sheet .review-panel.is-prominent .ai-box{min-height:180px;max-height:none}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="app-bar">
+    <div class="app-title">
+      <h1>US Abdominal — Clínica La Salud</h1>
+      <div class="app-meta">
+        <span class="autosave-status" id="autosaveStatus">Protección activa: guardado automático local</span>
+        <span class="progress-status" id="reportProgress">0/12 campos</span>
+      </div>
+    </div>
+    <div class="app-bar-actions">
+      <button class="btn small ghost" id="btnClearForm">Nuevo</button>
+      <button class="btn small" id="btnOpenHistory">Historial</button>
+      <button class="btn small primary" id="btnExportPdf">PDF</button>
+      <button class="btn small success" id="btnSaveDrive">Drive</button>
+      <button class="btn small ghost" id="btnOpenSettings" aria-label="Configuración">⚙</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <main class="report-container">
+      <article class="report-page" id="reportPage">
+        <header class="report-header">
+          <div class="logo-box"><img id="logoLeft" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='30' r='22' fill='%23123c76'/%3E%3Crect x='36' y='48' width='6' height='38' fill='%23123c76' rx='2'/%3E%3Crect x='58' y='48' width='6' height='38' fill='%23123c76' rx='2'/%3E%3Cline x1='20' y1='52' x2='80' y2='52' stroke='%23123c76' stroke-width='2'/%3E%3C/svg%3E" alt="Logo"></div>
+          <div class="header-center">
+            <h2>Clínica Médica La Salud</h2>
+            <p>Médico Ultrasonografista: Dra. Mariana López</p>
+            <p>B. El Centro, Siguatepeque, Comayagua</p>
+            <p>Tel: 9645-1203</p>
+          </div>
+          <div class="logo-box"><img id="logoRight" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='15' y='20' width='70' height='60' rx='8' fill='%23dcecf3' stroke='%23123c76' stroke-width='2'/%3E%3Ccircle cx='50' cy='50' r='18' fill='none' stroke='%23123c76' stroke-width='2'/%3E%3Cline x1='50' y1='32' x2='50' y2='68' stroke='%23123c76' stroke-width='1.5'/%3E%3Cline x1='32' y1='50' x2='68' y2='50' stroke='%23123c76' stroke-width='1.5'/%3E%3C/svg%3E" alt="Ultrasonido"></div>
+        </header>
+
+        <h3 class="section-title">Reporte de Ultrasonido Abdominal</h3>
+        <p class="form-hint">Toque una casilla para escribir. Use “Dictar casilla” para voz o revisión.</p>
+
+        <div class="field-line">
+          <label>Nombre:</label>
+          <input type="text" data-field="nombre" placeholder="Nombre del paciente" autocomplete="off">
+        </div>
+        <div class="field-line">
+          <label>Edad:</label>
+          <input type="text" data-field="edad" placeholder="Edad" autocomplete="off" style="max-width:100px">
+          <label style="min-width:45px">Fecha:</label>
+          <input type="text" data-field="fecha" placeholder="DD/MM/AAAA" autocomplete="off" style="flex:1">
+          <button class="btn-today" id="btnFechaHoy">Hoy</button>
+        </div>
+
+        <div class="field-block">
+          <label class="subsection">Indicación</label>
+          <textarea data-field="indicacion" rows="1" placeholder="Motivo del estudio..." autocomplete="off"></textarea>
+        </div>
+
+        <h4 class="subsection">Hallazgos</h4>
+
+        <div class="field-block">
+          <label style="font-weight:700;font-size:14px">Hígado</label>
+          <textarea data-field="higado" rows="2" placeholder="Forma, tamaño, ecogenicidad, lesiones..." autocomplete="off"></textarea>
+        </div>
+
+        <div class="field-block">
+          <label style="font-weight:700;font-size:14px">Vesícula Biliar</label>
+          <textarea data-field="vesicula" rows="2" placeholder="Pared, contenido, litiasis..." autocomplete="off"></textarea>
+        </div>
+
+        <div class="field-block">
+          <label style="font-weight:700;font-size:14px">Páncreas</label>
+          <textarea data-field="pancreas" rows="2" placeholder="Cabeza, cuerpo, cola, lesiones..." autocomplete="off"></textarea>
+        </div>
+
+        <div class="field-block">
+          <label style="font-weight:700;font-size:14px">Riñones</label>
+          <textarea data-field="rinones" rows="3" placeholder="Tamaño, parénquima, litiasis, quistes..." autocomplete="off"></textarea>
+        </div>
+
+        <div class="field-block">
+          <label style="font-weight:700;font-size:14px">Bazo</label>
+          <textarea data-field="bazo" rows="1" placeholder="Tamaño, homogeneidad..." autocomplete="off"></textarea>
+        </div>
+
+        <div class="field-block">
+          <label style="font-weight:700;font-size:14px">Vejiga</label>
+          <textarea data-field="vejiga" rows="1" placeholder="Pared, contenido, repleción..." autocomplete="off"></textarea>
+        </div>
+
+        <div class="field-block">
+          <label style="font-weight:700;font-size:14px">Dx</label>
+          <textarea data-field="dx" rows="2" placeholder="Diagnóstico(s)..." autocomplete="off"></textarea>
+        </div>
+
+        <div class="field-block">
+          <label style="font-weight:700;font-size:14px">Conclusión</label>
+          <textarea data-field="conclusion" rows="2" placeholder="Conclusión y recomendaciones..." autocomplete="off"></textarea>
+        </div>
+      </article>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <h3>Casilla activa</h3>
+        <span id="sidebarActiveLabel">Ninguna</span>
+        <button class="btn primary" id="btnOpenModal" style="margin-top:8px;width:100%">Abrir dictado y revisión</button>
+        <div class="status-inline" id="voiceStatus" style="margin-top:8px">Listo. Toque una casilla para escribir o dictar.</div>
+      </div>
+      <div class="sidebar-card">
+        <h3>Resumen</h3>
+        <div class="summary-row"><span>Paciente</span><span id="summaryPatient">Sin nombre</span></div>
+        <div class="summary-row"><span>Fecha</span><span id="summaryDate">Sin fecha</span></div>
+        <div class="summary-row"><span>Avance</span><span id="summaryProgress">0/12</span></div>
+        <button class="btn ghost" id="btnClearFormSidebar" style="margin-top:10px;width:100%">Nuevo reporte</button>
+      </div>
+    </aside>
+  </div>
+
+  <button class="btn primary dictation-fab" id="btnOpenDictation">Dictar casilla</button>
+
+  <!-- Dictado Modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal-sheet dictation-sheet">
+      <div class="modal-header">
+        <h2 id="modalTitle">Dictado: Ninguna</h2>
+        <button class="btn close" id="btnCloseModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="status-inline" id="modalStatus">Listo. Seleccione una casilla y dicte cuando lo necesite.</div>
+        <div class="dictation-workspace">
+          <div class="dictation-main">
+            <label class="dictation-label" for="transcriptEditor">Texto transcrito o escrito</label>
+            <textarea class="transcript-box" id="transcriptEditor" placeholder="Aquí aparece el dictamen en texto grande. Puede corregirlo antes de insertarlo en la casilla."></textarea>
+          </div>
+          <div class="dictation-actions">
+            <button class="btn" id="btnStartVoice">🎤 Dictar</button>
+            <button class="btn" id="btnPauseVoice">⏸ Pausa</button>
+            <button class="btn" id="btnStopVoice">⏹ Fin</button>
+            <button class="btn success" id="btnInsertTranscript">Insertar en casilla</button>
+            <button class="btn warn" id="btnCancelVoice">Cancelar</button>
+            <div class="review-panel" id="reviewPanel">
+              <h4>Revisión con IA</h4>
+              <div class="btn-row">
+                <button class="btn small primary" id="btnReviewField">Revisar casilla</button>
+                <button class="btn small success" id="btnApplyAiToField">Aplicar</button>
+              </div>
+              <textarea class="ai-box" id="aiResult" placeholder="La revisión aparecerá aquí..." style="margin-top:8px"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-backdrop" id="settingsBackdrop">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h2>Configuración</h2>
+        <button class="btn close" id="btnCloseSettings">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-group">
+          <h4>OpenAI Whisper (dictado)</h4>
+          <label>API Key OpenAI<input type="password" id="whisperApiKey" placeholder="sk-..."></label>
+          <label>Modelo<input type="text" id="whisperModel" placeholder="whisper-1"></label>
+          <p class="settings-note">Para uso publicado, proteja esta clave con un servidor intermedio.</p>
+        </div>
+        <div class="settings-group">
+          <h4>OpenAI Verificación (casillas)</h4>
+          <label>API Key OpenAI<input type="password" id="openaiKey" placeholder="sk-..."></label>
+          <label>Modelo<input type="text" id="openaiModel" placeholder="gpt-5-mini"></label>
+        </div>
+        <div class="settings-group">
+          <h4>Google Drive</h4>
+          <label>Client ID<input type="text" id="googleClientId" placeholder="Google OAuth Client ID"></label>
+          <label>ID Carpeta Drive<input type="text" id="driveFolderId" placeholder="Folder ID"></label>
+        </div>
+        <div class="settings-group">
+          <h4>Logos del reporte</h4>
+          <label>Logo izquierdo<input type="file" id="logoLeftUpload" accept="image/*"></label>
+          <label>Logo derecho<input type="file" id="logoRightUpload" accept="image/*"></label>
+        </div>
+        <button class="btn primary" id="btnSaveSettings">Guardar configuración</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div class="modal-backdrop" id="historyBackdrop">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h2>Historial de Reportes</h2>
+        <button class="btn close" id="btnCloseHistory">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="history-toolbar">
+          <input type="text" id="historySearch" placeholder="Buscar por nombre, fecha o hallazgo...">
+          <button class="btn small primary" id="btnSaveSnapshot">Guardar actual</button>
+          <button class="btn small danger" id="btnClearHistory">Limpiar historial</button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden PDF render target -->
+  <div class="pdf-only" id="pdfPage"></div>
+</div>
+
+<script>
+/* ── CONSTANTS ── */
+const FIELD_LABELS = {
+  nombre:"Nombre", fecha:"Fecha", edad:"Edad", indicacion:"Indicación",
+  higado:"Hígado", vesicula:"Vesícula Biliar", pancreas:"Páncreas",
+  rinones:"Riñones", bazo:"Bazo", vejiga:"Vejiga",
+  dx:"Dx", conclusion:"Conclusión"
+};
+
+const FIELD_EXPECTATIONS = {
+  nombre:"Nombre completo del paciente.",
+  fecha:"Fecha del estudio en formato DD/MM/AAAA.",
+  edad:"Edad del paciente en años.",
+  indicacion:"Motivo clínico del estudio: dolor, control, sospecha, etc.",
+  higado:"Descripción del hígado: tamaño (altura hepática en cm), forma, contornos, ecogenicidad, lesiones focales, vías suprahepáticas.",
+  vesicula:"Descripción de la vesícula biliar: pared (mm), contenido, litiasis (tamaño, sombra), pólipos, barro biliar.",
+  pancreas:"Descripción del páncreas: cabeza, cuerpo, cola, tamaño, ecogenicidad, lesiones ocupativas, conducto de Wirsung.",
+  rinones:"Descripción de ambos riñones: tamaño (longitud x AP en cm), parénquima, relación corticomedular, litiasis, quistes, hidronefrosis.",
+  bazo:"Descripción del bazo: tamaño (longitud en cm), homogeneidad, lesiones, esplenomegalia.",
+  vejiga:"Descripción de la vejiga: pared, contenido anecogénico, repleción, lesiones, residuo post-miccional.",
+  dx:"Diagnóstico(s) ultrasonográfico(s). Usar terminología médica estándar.",
+  conclusion:"Resumen de hallazgos relevantes y recomendaciones clínicas."
+};
+
+const DEFAULT_SETTINGS = {
+  openaiKey:"", openaiModel:"gpt-5-mini",
+  whisperApiKey:"", whisperModel:"whisper-1",
+  googleClientId:"", driveFolderId:"",
+  logoLeft:"", logoRight:""
+};
+
+const DRAFT_KEY = "abdDraft", HISTORY_KEY = "abdHistory", SETTINGS_KEY = "abdSettings";
+const HISTORY_MAX = 120;
+
+const app = {activeField:null,mediaRecorder:null,mediaStream:null,audioChunks:[],isListening:false,isPaused:false,recordingCanceled:false,voiceSupported:true,
+  transcriptBase:"",transcriptBuffer:"",guardEnabled:true,settings:{...DEFAULT_SETTINGS},googleTokenClient:null};
+const el = {};
+
+/* ── UTILS ── */
+function vibrate(d=10){if(navigator.vibrate)navigator.vibrate(d)}
+function norm(t){return t.replace(/\s+/g," ").replace(/\s([,.;:])/g,"$1").trim()}
+const baseVH = window.innerHeight;
+function updateKeyboardVH(){
+  const vh = window.visualViewport?.height || window.innerHeight;
+  document.documentElement.style.setProperty("--visual-vh",`${vh}px`);
+  document.body.classList.toggle("keyboard-open", vh < baseVH - 120);
+}
+
+/* ── CACHE ELEMENTS ── */
+function cacheEls(){
+  el.reportPage=document.getElementById("reportPage"); el.pdfPage=document.getElementById("pdfPage");
+  el.fields=Array.from(document.querySelectorAll("[data-field]"));
+  el.voiceStatus=document.getElementById("voiceStatus"); el.sidebarActiveLabel=document.getElementById("sidebarActiveLabel");
+  el.transcriptEditor=document.getElementById("transcriptEditor"); el.aiResult=document.getElementById("aiResult");
+  el.reviewPanel=document.getElementById("reviewPanel");
+  el.btnStartVoice=document.getElementById("btnStartVoice"); el.btnPauseVoice=document.getElementById("btnPauseVoice");
+  el.btnStopVoice=document.getElementById("btnStopVoice"); el.btnInsertTranscript=document.getElementById("btnInsertTranscript");
+  el.btnCancelVoice=document.getElementById("btnCancelVoice"); el.btnReviewField=document.getElementById("btnReviewField");
+  el.btnApplyAiToField=document.getElementById("btnApplyAiToField");
+  el.btnOpenDictation=document.getElementById("btnOpenDictation");
+  el.btnClearForm=document.getElementById("btnClearForm"); el.btnClearFormSidebar=document.getElementById("btnClearFormSidebar");
+  el.btnExportPdf=document.getElementById("btnExportPdf"); el.btnSaveDrive=document.getElementById("btnSaveDrive");
+  el.btnOpenHistory=document.getElementById("btnOpenHistory"); el.btnCloseHistory=document.getElementById("btnCloseHistory");
+  el.btnClearHistory=document.getElementById("btnClearHistory");
+  el.btnSaveSettings=document.getElementById("btnSaveSettings");
+  el.btnOpenModal=document.getElementById("btnOpenModal"); el.btnCloseModal=document.getElementById("btnCloseModal");
+  el.btnFechaHoy=document.getElementById("btnFechaHoy");
+  el.whisperApiKey=document.getElementById("whisperApiKey"); el.whisperModel=document.getElementById("whisperModel");
+  el.openaiKey=document.getElementById("openaiKey"); el.openaiModel=document.getElementById("openaiModel");
+  el.googleClientId=document.getElementById("googleClientId"); el.driveFolderId=document.getElementById("driveFolderId");
+  el.logoLeft=document.getElementById("logoLeft"); el.logoRight=document.getElementById("logoRight");
+  el.logoLeftUpload=document.getElementById("logoLeftUpload"); el.logoRightUpload=document.getElementById("logoRightUpload");
+  el.modalBackdrop=document.getElementById("modalBackdrop"); el.modalSheet=document.querySelector("#modalBackdrop .modal-sheet");
+  el.modalTitle=document.getElementById("modalTitle"); el.modalStatus=document.getElementById("modalStatus");
+  el.settingsBackdrop=document.getElementById("settingsBackdrop");
+  el.historyBackdrop=document.getElementById("historyBackdrop"); el.historySearch=document.getElementById("historySearch");
+  el.historyList=document.getElementById("historyList");
+  el.btnSaveSnapshot=document.getElementById("btnSaveSnapshot");
+  el.btnOpenSettings=document.getElementById("btnOpenSettings"); el.btnCloseSettings=document.getElementById("btnCloseSettings");
+  el.autosaveStatus=document.getElementById("autosaveStatus");
+  el.reportProgress=document.getElementById("reportProgress"); el.summaryPatient=document.getElementById("summaryPatient");
+  el.summaryDate=document.getElementById("summaryDate"); el.summaryProgress=document.getElementById("summaryProgress");
+}
+
+/* ── STATUS ── */
+function setStatus(msg,tone="info"){
+  const tones={info:"#155e75",ok:"#20603d",warn:"#8a5a00",danger:"#8f1d1d"};
+  const color=tones[tone]||tones.info;
+  if(el.voiceStatus){el.voiceStatus.textContent=msg;el.voiceStatus.style.borderLeftColor=color}
+  if(el.modalStatus){el.modalStatus.textContent=msg;el.modalStatus.style.borderLeftColor=color}
+}
+function updateDictationEntry(){
+  const hasActive=!!app.activeField;
+  if(el.btnOpenDictation)el.btnOpenDictation.classList.toggle("visible",hasActive);
+  if(el.btnOpenModal)el.btnOpenModal.disabled=!hasActive;
+}
+function updateReportProgress(){
+  if(!el.fields)return;
+  const data=getFormData();
+  const total=el.fields.length;
+  const completed=Object.values(data).filter(Boolean).length;
+  const patient=data.nombre||"Sin nombre";
+  const date=data.fecha||"Sin fecha";
+  if(el.reportProgress)el.reportProgress.textContent=`${completed}/${total} campos`;
+  if(el.summaryPatient)el.summaryPatient.textContent=patient;
+  if(el.summaryDate)el.summaryDate.textContent=date;
+  if(el.summaryProgress)el.summaryProgress.textContent=`${completed}/${total}`;
+}
+function setRecordingUI(on){
+  if(el.btnStartVoice){el.btnStartVoice.classList.toggle("is-recording",on);el.btnStartVoice.textContent=on?"Grabando":"🎤 Dictar"}
+  if(el.modalSheet)el.modalSheet.classList.toggle("is-recording",on)
+}
+function setReviewProminent(on){
+  if(el.reviewPanel)el.reviewPanel.classList.toggle("is-prominent",on);
+  if(on&&el.reviewPanel)el.reviewPanel.scrollIntoView({block:"nearest",behavior:"smooth"})
+}
+
+/* ── ACTIVE FIELD ── */
+function setActiveField(field){
+  app.activeField=field; el.fields.forEach(f=>f.classList.remove("active-target"));
+  if(!field){if(el.sidebarActiveLabel)el.sidebarActiveLabel.textContent="Ninguna";updateModalTitle();updateDictationEntry();return}
+  field.classList.add("active-target");
+  const label=FIELD_LABELS[field.dataset.field]||field.dataset.field;
+  if(el.sidebarActiveLabel)el.sidebarActiveLabel.textContent=label;
+  updateModalTitle(); vibrate(8);
+  setStatus(`Casilla activa: ${label}. Puede escribir o abrir dictado.`,"info");
+  updateDictationEntry();
+  if(!app.isListening){el.transcriptEditor.value="";app.transcriptBase="";app.transcriptBuffer=""}
+}
+function updateModalTitle(){
+  const label=app.activeField?FIELD_LABELS[app.activeField.dataset.field]||app.activeField.dataset.field:"Ninguna";
+  el.modalTitle.textContent=`Dictado: ${label}`
+}
+
+/* ── FORM DATA ── */
+function getFormData(){const d={};el.fields.forEach(f=>{d[f.dataset.field]=f.value.trim()});return d}
+function hasDraftData(){return Object.values(getFormData()).some(v=>v.trim())||!!(el.transcriptEditor?.value||"").trim()||!!(el.aiResult?.value||"").trim()}
+function saveDraft(){
+  localStorage.setItem(DRAFT_KEY,JSON.stringify({form:getFormData(),transcript:el.transcriptEditor?.value||"",aiResult:el.aiResult?.value||"",timestamp:Date.now()}));
+  updateAutosaveStatus("guardado");updateReportProgress()
+}
+function updateAutosaveStatus(mode="idle"){
+  if(!el.autosaveStatus)return;
+  if(mode==="restored"){el.autosaveStatus.textContent="Borrador recuperado automáticamente";return}
+  if(mode==="guardado"){const n=new Date();el.autosaveStatus.textContent=`Protección activa: guardado ${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}`;return}
+  el.autosaveStatus.textContent="Protección activa: guardado automático local"
+}
+function restoreDraft(){
+  const raw=localStorage.getItem(DRAFT_KEY); if(!raw)return;
+  try{const d=JSON.parse(raw);const has=Object.values(d.form||{}).some(v=>v.trim());if(!has)return;
+    el.fields.forEach(f=>{f.value=d.form[f.dataset.field]||""});
+    if(el.transcriptEditor)el.transcriptEditor.value=d.transcript||"";
+    if(el.aiResult)el.aiResult.value=d.aiResult||"";
+    setStatus("Borrador restaurado.","ok");updateAutosaveStatus("restored");updateReportProgress()}catch(e){}
+}
+function clearDraft(){localStorage.removeItem(DRAFT_KEY);updateAutosaveStatus()}
+function setupNavGuard(){
+  const persist=()=>{if(!app.guardEnabled)return;if(hasDraftData())saveDraft()};
+  window.addEventListener("beforeunload",persist);window.addEventListener("pagehide",persist);
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")persist()})
+}
+
+/* ── MODAL ── */
+function openModal(){updateKeyboardVH();el.modalBackdrop.classList.add("open");document.body.style.overflow="hidden";
+  if(!app.isListening){el.transcriptEditor.value="";app.transcriptBase="";app.transcriptBuffer=""}setReviewProminent(false);updateModalTitle();vibrate(8)}
+function closeModal(){
+  if(app.isListening)cancelVoice();
+  setReviewProminent(false);setRecordingUI(false);el.modalBackdrop.classList.remove("open");document.body.style.overflow="";document.body.classList.remove("keyboard-open");vibrate(8)
+}
+function openSettingsModal(){updateKeyboardVH();el.settingsBackdrop.classList.add("open");document.body.style.overflow="hidden";vibrate(8)}
+function closeSettingsModal(){el.settingsBackdrop.classList.remove("open");document.body.style.overflow="";document.body.classList.remove("keyboard-open");vibrate(8)}
+
+/* ── HISTORY ── */
+function getHistory(){const r=localStorage.getItem(HISTORY_KEY);if(!r)return[];try{const p=JSON.parse(r);return Array.isArray(p)?p:[]}catch(e){return[]}}
+function saveHistory(h){localStorage.setItem(HISTORY_KEY,JSON.stringify(h.slice(0,HISTORY_MAX)))}
+function addToHistory(source="local",extra={}){
+  const form=getFormData(),now=Date.now(),fileName=extra.fileName||buildFileName();
+  const patientName=form.nombre||"Paciente sin nombre",studyDate=form.fecha||"Sin fecha";
+  const historyKey=`${patientName.trim().toLowerCase()}|${studyDate.trim().toLowerCase()}|${fileName}`;
+  const h=getHistory();const idx=h.findIndex(i=>i.historyKey===historyKey||i.fileName===fileName);
+  const existing=idx>=0?h[idx]:{};
+  const rec={...existing,id:existing.id||`${now}_${Math.random().toString(36).slice(2,8)}`,historyKey,
+    timestamp:existing.timestamp||now,updatedAt:now,source:source==="drive"?"drive":source==="local"?"local":(existing.source||"draft"),
+    hasLocalPdf:source==="local"||!!existing.hasLocalPdf,hasDrive:source==="drive"||!!existing.hasDrive,
+    fileName,patientName,studyDate,preview:form.conclusion||form.dx||form.indicacion||"Sin hallazgos",data:form,
+    driveFileId:extra.driveFileId||existing.driveFileId||"",driveUrl:extra.driveUrl||existing.driveUrl||""};
+  if(idx>=0)h.splice(idx,1);h.unshift(rec);saveHistory(h);return rec
+}
+function getHistorySearchText(i){return `${i.patientName||""} ${i.studyDate||""} ${i.preview||""} ${i.fileName||""} ${Object.values(i.data||{}).join(" ")}`.toLowerCase()}
+function renderHistory(filterText=""){
+  if(!el.historyList)return;const h=getHistory();const f=(filterText||"").toLowerCase().trim();
+  const filtered=!f?h:h.filter(i=>getHistorySearchText(i).includes(f));
+  if(!filtered.length){el.historyList.innerHTML=`<div class="history-empty">No hay reportes guardados.</div>`;return}
+  el.historyList.innerHTML=filtered.map(i=>{
+    const dt=new Date(i.updatedAt||i.timestamp).toLocaleString("es-HN");
+    const badges=`${i.hasLocalPdf!==false?`<span class="history-badge">PDF local</span>`:""}${i.hasDrive||i.driveUrl?`<span class="history-badge">Google Drive</span>`:""}`;
+    const driveBtn=i.driveUrl?`<button class="btn small" data-ha="open-drive" data-hid="${i.id}">Abrir Drive</button>`:"";
+    return `<article class="history-item"><div class="history-title">${i.patientName}</div><div class="history-meta">${i.studyDate} · ${i.fileName||"Sin archivo"} · ${dt}</div><div class="history-badges">${badges||`<span class="history-badge">Borrador</span>`}</div><div class="history-preview">${i.preview}</div><div class="history-actions"><button class="btn small primary" data-ha="load" data-hid="${i.id}">Cargar</button>${driveBtn}<button class="btn small" data-ha="export" data-hid="${i.id}">Exportar PDF</button><button class="btn small danger" data-ha="delete" data-hid="${i.id}">Eliminar</button></div></article>`
+  }).join("")
+}
+function loadHistoryRecord(id){const r=getHistory().find(i=>i.id===id);if(!r)return;el.fields.forEach(f=>{f.value=r.data[f.dataset.field]||""});saveDraft();updateReportProgress();setStatus(`Reporte cargado: ${r.patientName}.`,"ok")}
+function deleteHistoryRecord(id){const h=getHistory().filter(i=>i.id!==id);saveHistory(h);renderHistory(el.historySearch?.value||"")}
+async function exportHistoryRecord(id){const r=getHistory().find(i=>i.id===id);if(!r)return;loadHistoryRecord(id);await exportPdfToDownload()}
+function saveCurrentSnapshot(){const fc=Object.values(getFormData()).filter(v=>v.trim()).length;if(!fc){setStatus("No hay datos para guardar en historial.","warn");return}const rec=addToHistory("draft",{fileName:buildFileName()});renderHistory(el.historySearch?.value||"");setStatus(`Reporte guardado en historial: ${rec.patientName}.`,"ok")}
+function openHistoryModal(){renderHistory(el.historySearch?.value||"");el.historyBackdrop.classList.add("open");document.body.style.overflow="hidden"}
+function closeHistoryModal(){el.historyBackdrop.classList.remove("open");document.body.style.overflow=""}
+
+/* ── INSERT ── */
+function insertTranscriptToActiveField(){
+  if(!app.activeField){setStatus("Seleccione una casilla antes de insertar.","warn");return}
+  const text=norm(el.transcriptEditor.value);if(!text){setStatus("No hay texto para insertar.","warn");return}
+  const isLong=app.activeField.tagName==="TEXTAREA";
+  if(isLong&&app.activeField.value.trim())app.activeField.value=`${app.activeField.value.trim()} ${text}`;
+  else app.activeField.value=text;
+  setStatus("Texto insertado en la casilla.","ok");vibrate([30,50,30]);
+  app.transcriptBase="";app.transcriptBuffer="";el.transcriptEditor.value="";saveDraft();
+  setTimeout(()=>closeModal(),600)
+}
+
+/* ── VOICE / WHISPER ── */
+function getSupportedAudioMime(){
+  const options=["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/mpeg"];
+  return options.find(t=>window.MediaRecorder?.isTypeSupported?.(t))||""
+}
+function setupVoice(){
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){
+    app.voiceSupported=false;
+    setStatus("Navegador sin soporte de grabación. Use Chrome o Edge.","danger");
+    el.btnStartVoice.disabled=true;el.btnPauseVoice.disabled=true;el.btnStopVoice.disabled=true;return
+  }
+  app.voiceSupported=true
+}
+function stopMediaStream(){
+  if(app.mediaStream){app.mediaStream.getTracks().forEach(t=>t.stop());app.mediaStream=null}
+}
+async function transcribeWithWhisper(blob){
+  const apiKey=(app.settings.whisperApiKey||"").trim();
+  if(!apiKey)throw new Error("Falta API Key de OpenAI para Whisper.");
+  const model=(app.settings.whisperModel||"whisper-1").trim()||"whisper-1";
+  const fileName=blob.type.includes("mp4")?"dictado.mp4":"dictado.webm";
+  const form=new FormData();
+  form.append("file",blob,fileName);
+  form.append("model",model);
+  form.append("language","es");
+  form.append("response_format","json");
+  form.append("prompt","Reporte de ultrasonido abdominal en español médico hondureño. Términos frecuentes: hígado, vesícula biliar, páncreas, riñones, bazo, vejiga, litiasis, ecogenicidad, parénquima, hidronefrosis.");
+  const resp=await fetch("https://api.openai.com/v1/audio/transcriptions",{
+    method:"POST",
+    headers:{Authorization:`Bearer ${apiKey}`},
+    body:form
+  });
+  if(!resp.ok){const t=await resp.text();throw new Error(t||`HTTP ${resp.status}`)}
+  const data=await resp.json();
+  return norm(data.text||"")
+}
+async function handleRecordingStop(){
+  const chunks=app.audioChunks.splice(0);
+  stopMediaStream();setRecordingUI(false);el.btnPauseVoice.textContent="⏸ Pausa";
+  app.isListening=false;app.isPaused=false;
+  if(app.recordingCanceled){app.recordingCanceled=false;return}
+  if(!chunks.length){setStatus("No se capturó audio.","warn");return}
+  const type=chunks[0]?.type||getSupportedAudioMime()||"audio/webm";
+  const blob=new Blob(chunks,{type});
+  if(blob.size<1200){setStatus("Grabación muy corta. Intente de nuevo.","warn");return}
+  try{
+    setStatus("Transcribiendo con Whisper...","info");
+    const text=await transcribeWithWhisper(blob);
+    if(!text){setStatus("Whisper no devolvió texto.","warn");return}
+    const current=el.transcriptEditor.value.trim();
+    el.transcriptEditor.value=norm(current?`${current} ${text}`:text);
+    el.transcriptEditor.scrollTop=el.transcriptEditor.scrollHeight;
+    setStatus("Transcripción lista. Revise antes de insertar.","ok");saveDraft();vibrate([40,50,40])
+  }catch(e){setStatus(`Error Whisper: ${e.message}`,"danger");console.error("Whisper error:",e)}
+}
+async function startVoice(){
+  if(!app.activeField){setStatus("Primero seleccione una casilla.","warn");vibrate(15);return}
+  if(app.isListening){setStatus("La grabación ya está activa.","warn");return}
+  if(!(app.settings.whisperApiKey||"").trim()){setStatus("Configure API Key de OpenAI en ⚙ para usar Whisper.","warn");openSettingsModal();return}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    const mimeType=getSupportedAudioMime();
+    app.mediaStream=stream;app.audioChunks=[];app.recordingCanceled=false;
+    app.mediaRecorder=new MediaRecorder(stream,mimeType?{mimeType}:undefined);
+    app.mediaRecorder.ondataavailable=e=>{if(e.data?.size)app.audioChunks.push(e.data)};
+    app.mediaRecorder.onstop=handleRecordingStop;
+    app.mediaRecorder.start();
+    app.isListening=true;app.isPaused=false;el.btnPauseVoice.textContent="⏸ Pausa";
+    setRecordingUI(true);setStatus("Grabando audio para Whisper...","ok");vibrate([20,30,20])
+  }catch(e){
+    stopMediaStream();setRecordingUI(false);
+    const msg=e.name==="NotAllowedError"?"Permiso de micrófono denegado.":e.message;
+    setStatus(msg,"danger")
+  }
+}
+function pauseVoice(){
+  if(!app.mediaRecorder||!app.isListening){setStatus("No hay grabación activa.","info");vibrate(15);return}
+  if(!app.isPaused&&app.mediaRecorder.state==="recording"){app.mediaRecorder.pause();app.isPaused=true;setRecordingUI(false);el.btnPauseVoice.textContent="▶ Reanudar";setStatus("Grabación en pausa.","info");vibrate(10);return}
+  if(app.isPaused&&app.mediaRecorder.state==="paused"){app.mediaRecorder.resume();app.isPaused=false;setRecordingUI(true);el.btnPauseVoice.textContent="⏸ Pausa";setStatus("Grabando audio para Whisper...","ok");vibrate(10)}
+}
+function finalizeVoice(){
+  if(!app.mediaRecorder||!app.isListening){setStatus("No hay grabación activa.","info");return}
+  app.recordingCanceled=false;
+  if(app.mediaRecorder.state!=="inactive")app.mediaRecorder.stop();
+  setStatus("Procesando audio...","info");vibrate([50,30,50])
+}
+function cancelVoice(){
+  app.recordingCanceled=true;
+  if(app.mediaRecorder&&app.mediaRecorder.state!=="inactive")app.mediaRecorder.stop();else stopMediaStream();
+  app.isListening=false;app.isPaused=false;setRecordingUI(false);app.transcriptBase="";app.transcriptBuffer="";app.audioChunks=[];
+  el.transcriptEditor.value="";setReviewProminent(false);el.btnPauseVoice.textContent="⏸ Pausa";setStatus("Dictado cancelado.","info");vibrate(20)
+}
+
+/* ── AI REVIEW ── */
+function getReviewPrompt({scope,fieldId,value,data}){
+  const ctx=JSON.stringify(data,null,2);
+  if(scope==="field"){
+    const exp=FIELD_EXPECTATIONS[fieldId]||"Campo de reporte de ultrasonido abdominal.";
+    return `Eres un asistente médico especializado en reportes de ultrasonido abdominal. Revisa SOLO la casilla activa.
+
+Casilla: ${FIELD_LABELS[fieldId]}
+Qué debe contener: ${exp}
+Texto actual: ${value}
+Datos del reporte: ${ctx}
+
+Reglas:
+- No inventes datos. Solo mejora claridad y terminología médica.
+- Si el texto pertenece a otra casilla, indícalo en sugerencias.
+- Si faltan unidades (cm, mm), sugiere pero no inventes valores.
+- Mantén estilo profesional de reporte de ultrasonido.
+
+Responde en español con este formato:
+TEXTO_MEJORADO:
+<texto>
+
+COHERENCIA:
+<Coherente / Revisar / No corresponde> - <explicación>
+
+SUGERENCIAS:
+- <sugerencia>`
+  }
+  return `Eres un revisor clínico de reportes de ultrasonido abdominal. Revisa el reporte completo para claridad, coherencia y terminología médica.
+
+Datos: ${ctx}
+
+Responde:
+REPORTE_MEJORADO:
+<texto>
+
+INCOHERENCIAS_O_ALERTAS:
+- <alerta>
+
+SUGERENCIAS:
+- <sugerencia>`
+}
+
+function extractOpenAIText(data){
+  if(data.output_text)return data.output_text.trim();
+  let text="";
+  for(const item of data.output||[]){
+    for(const part of item.content||[]){
+      if(part.text)text+=part.text;
+    }
+  }
+  return text.trim()
+}
+
+async function reviewWithOpenAI(promptText){
+  const apiKey=(app.settings.openaiKey||"").trim();if(!apiKey)throw new Error("Sin API Key");
+  const model=(app.settings.openaiModel||DEFAULT_SETTINGS.openaiModel).trim()||DEFAULT_SETTINGS.openaiModel;
+  const resp=await fetch("https://api.openai.com/v1/responses",{
+    method:"POST",
+    headers:{"Content-Type":"application/json",Authorization:`Bearer ${apiKey}`},
+    body:JSON.stringify({
+      model,
+      instructions:"Eres un verificador clínico de reportes de ultrasonido abdominal. No diagnostiques fuera del texto aportado, no inventes medidas ni hallazgos, y mantén salida breve en español.",
+      input:promptText,
+      temperature:0.2,
+      max_output_tokens:900
+    })
+  });
+  if(!resp.ok){const t=await resp.text();throw new Error(t||`HTTP ${resp.status}`)}
+  const data=await resp.json();
+  const text=extractOpenAIText(data);
+  if(!text)throw new Error("OpenAI no devolvió texto.");
+  return text
+}
+
+function reviewLocally({scope,fieldId,value,data}){
+  let improved=norm(value||"");if(!improved)improved="Sin hallazgos reportados.";
+  const notes=[];
+  if(scope==="field"){
+    const organFields=["higado","vesicula","pancreas","rinones","bazo","vejiga"];
+    const descFields=["indicacion","dx","conclusion"];
+    if(["edad"].includes(fieldId)&&improved&&!/\d/.test(improved))notes.push("La edad debe ser un número.");
+    if(["fecha"].includes(fieldId)&&improved&&!/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(improved))notes.push("Formato de fecha sugerido: DD/MM/AAAA.");
+    if(organFields.includes(fieldId)&&improved&&improved.length<10)notes.push("Descripción muy corta para un hallazgo de órgano.");
+    if(fieldId==="higado"&&improved&&!/h[ií]gado|hep[aá]t|altura|ecogenicidad/i.test(improved))notes.push("Verifique que el texto describa hallazgos hepáticos.");
+    if(fieldId==="vesicula"&&improved&&!/ves[ií]cula|biliar|litiasis|lito|c[áa]lculo|pared/i.test(improved))notes.push("Verifique que el texto describa la vesícula biliar.");
+    if(fieldId==="pancreas"&&improved&&!/p[aá]ncreas|cabeza|cuerpo|cola|wirsung/i.test(improved))notes.push("Verifique que el texto describa el páncreas.");
+    if(fieldId==="rinones"&&improved&&!/ri[ñn][oó]n|renal|par[ée]nquima|litiasis|hidronefrosis/i.test(improved))notes.push("Verifique que el texto describa los riñones.");
+    if(fieldId==="bazo"&&improved&&!/bazo|espl[eé]n|esplenomegalia/i.test(improved))notes.push("Verifique que el texto describa el bazo.");
+    if(fieldId==="vejiga"&&improved&&!/vejiga|vesical|anecog[eé]nico|repleci[oó]n/i.test(improved))notes.push("Verifique que el texto describa la vejiga.");
+    if(fieldId==="dx"&&improved&&improved.length<5)notes.push("El diagnóstico debe ser más específico.");
+    const coherence=notes.length?"Revisar":"Coherente";
+    if(!notes.length)notes.push("El texto es adecuado para esta casilla.");
+    return `TEXTO_MEJORADO:\n${improved}\n\nCOHERENCIA:\n${coherence} - Revisión local.\n\nSUGERENCIAS:\n- ${notes.join("\n- ")}`
+  }
+  const reportText=Object.entries(data).filter(([,t])=>t).map(([id,t])=>`${FIELD_LABELS[id]}: ${norm(t)}`).join("\n");
+  return `REPORTE_MEJORADO:\n${reportText}\n\nINCOHERENCIAS_O_ALERTAS:\n- No se detectaron incoherencias mayores.\n\nSUGERENCIAS:\n- Verificar hallazgos con correlación clínica.`
+}
+
+async function runAiReview(scope){
+  const data=getFormData();const fieldId=app.activeField?.dataset.field;
+  const pending=el.transcriptEditor?.value?.trim()||"";const fieldVal=app.activeField?.value?.trim()||"";
+  const value=scope==="field"?(pending||fieldVal):fieldVal;
+  if(scope==="field"&&!fieldId){setStatus("Seleccione una casilla.","warn");return}
+  if(scope==="field"&&!value){setStatus("No hay texto para revisar.","warn");return}
+  setReviewProminent(true);setStatus("Analizando con IA... revise el panel resaltado.","info");if(el.aiResult)el.aiResult.value="";
+  try{
+    const prompt=getReviewPrompt({scope,fieldId,value,data});
+    const result=app.settings.openaiKey?await reviewWithOpenAI(prompt):reviewLocally({scope,fieldId,value,data});
+    el.aiResult.value=result;setReviewProminent(true);setStatus("Revisión completada. Verifique el panel resaltado antes de aplicar.","ok");vibrate([30,40,30])
+  }catch(e){setStatus("OpenAI no respondió. Revisión local.","warn");
+    el.aiResult.value=reviewLocally({scope,fieldId,value,data})+`\n\nNOTA: OpenAI no disponible. Verifique API Key/modelo en ⚙.`;setReviewProminent(true);
+    console.error("OpenAI review error:",e)}
+}
+function applyAiTextToField(){
+  if(!app.activeField){setStatus("Seleccione una casilla.","warn");return}
+  const m=el.aiResult.value.match(/TEXTO_MEJORADO:\s*([\s\S]*?)(?:\n\s*COHERENCIA:|\n\s*SUGERENCIAS:)/i);
+  const suggested=m?norm(m[1]):norm(el.aiResult.value);
+  if(!suggested){setStatus("No se encontró texto sugerido.","warn");return}
+  app.activeField.value=suggested;setReviewProminent(false);setStatus("Texto aplicado.","ok");saveDraft();vibrate([30,50,30])
+}
+
+/* ── PDF ── */
+function buildFileName(){
+  const d=getFormData();const n=(d.nombre||"Paciente").replace(/[^a-zA-Z0-9_-]+/g,"_");
+  const now=new Date();return `Reporte_Abdominal_${n}_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}.pdf`
+}
+function fitLine(pdf,text,maxW){const s=String(text||"").trim();if(!s)return"";let o=s;while(pdf.getTextWidth(o)>maxW&&o.length>1)o=`${o.slice(0,-2)}…`;return o}
+function splitMulti(pdf,text,maxW){const s=String(text||"").trim();return s?pdf.splitTextToSize(s,maxW):[]}
+function optimizeLogo(imgEl,q=.42){
+  if(!imgEl||!imgEl.src)return null;const sw=Math.max(1,imgEl.naturalWidth||200),sh=Math.max(1,imgEl.naturalHeight||200);
+  const s=Math.min(1,260/Math.max(sw,sh));const w=Math.max(1,Math.round(sw*s)),h=Math.max(1,Math.round(sh*s));
+  const c=document.createElement("canvas");c.width=w;c.height=h;const ctx=c.getContext("2d");if(!ctx)return null;
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);ctx.drawImage(imgEl,0,0,w,h);return c.toDataURL("image/jpeg",q)
+}
+async function generatePdfBlob(){
+  const data=getFormData();const{jsPDF}=window.jspdf;
+  const pdf=new jsPDF({orientation:"portrait",unit:"pt",format:"letter",compress:true,putOnlyUsedFonts:true});
+  const pw=612,ph=792,L=28,R=pw-28,B=ph-34;let y=28;
+  const lL=optimizeLogo(el.logoLeft,.42),lR=optimizeLogo(el.logoRight,.38);
+  const addPageIfNeeded=(need)=>{if(y+need<=B)return;pdf.addPage();y=34};
+  const drawHeader=()=>{
+    if(lL)pdf.addImage(lL,"JPEG",L,y,64,64,undefined,"FAST");if(lR)pdf.addImage(lR,"JPEG",R-54,y,54,64,undefined,"FAST");
+    pdf.setTextColor(18,60,118);pdf.setFont("times","bold");pdf.setFontSize(17);pdf.text("Clínica Médica La Salud",pw/2,y+16,{align:"center"});
+    pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(12);
+    pdf.text("Médico Ultrasonografista: Dra. Mariana López",pw/2,y+33,{align:"center"});
+    pdf.text("B. El Centro, Siguatepeque, Comayagua",pw/2,y+48,{align:"center"});pdf.text("Tel: 9645-1203",pw/2,y+63,{align:"center"});
+    y+=90;pdf.setFont("times","bold");pdf.setFontSize(18);pdf.text("Reporte de Ultrasonido Abdominal",L,y);y+=14
+  };
+  const drawFooter=()=>{
+    const pages=pdf.getNumberOfPages();
+    for(let i=1;i<=pages;i++){pdf.setPage(i);pdf.setFont("times","normal");pdf.setFontSize(9);pdf.setTextColor(90,90,90);pdf.text(`Página ${i} de ${pages}`,R,ph-18,{align:"right"})}
+  };
+  const drawLL=(label,value)=>{addPageIfNeeded(30);pdf.setTextColor(17,17,17);pdf.setFont("times","bold");pdf.setFontSize(13);pdf.text(`${label}:`,L,y+13);const lx=L+95;pdf.setLineWidth(.8);pdf.line(lx,y+17,R,y+17);pdf.setFont("times","normal");pdf.setFontSize(12);const t=fitLine(pdf,value,R-lx-6);if(t)pdf.text(t,lx+3,y+13);y+=30};
+  const drawBlock=(title,value,minLines=2)=>{
+    pdf.setFont("times","normal");pdf.setFontSize(12);
+    const textLines=splitMulti(pdf,value,R-L-8);
+    const lineHeight=14;
+    let idx=0,first=true;
+    do{
+      addPageIfNeeded(24+(minLines*lineHeight)+14);
+      const heading=first?title:`${title} (cont.)`;
+      pdf.setTextColor(18,60,118);pdf.setFont("times","bold");pdf.setFontSize(14);pdf.text(heading,L,y+12);y+=18;
+      const available=Math.max(minLines,Math.floor((B-y-18)/lineHeight));
+      const remaining=textLines.length-idx;
+      const take=remaining>0?Math.min(remaining,available):0;
+      const boxLines=Math.max(minLines,take||1);
+      const boxHeight=boxLines*lineHeight+8,top=y;
+      pdf.setDrawColor(34,34,34);pdf.setLineWidth(.6);pdf.rect(L,top,R-L,boxHeight);
+      pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(12);
+      textLines.slice(idx,idx+take).forEach((line,i)=>pdf.text(line,L+4,top+15+i*lineHeight));
+      idx+=take;y=top+boxHeight+10;first=false;
+      if(idx<textLines.length)addPageIfNeeded(B)
+    }while(idx<textLines.length)
+  };
+  drawHeader();
+  drawLL("Nombre",data.nombre);drawLL("Edad",data.edad||"");drawLL("Fecha",data.fecha||"");
+  drawBlock("Indicación",data.indicacion||"",2);
+  drawBlock("Hígado",data.higado||"",2);drawBlock("Vesícula Biliar",data.vesicula||"",2);
+  drawBlock("Páncreas",data.pancreas||"",2);drawBlock("Riñones",data.rinones||"",3);
+  drawBlock("Bazo",data.bazo||"",2);drawBlock("Vejiga",data.vejiga||"",2);
+  drawBlock("Dx",data.dx||"",2);drawBlock("Conclusión",data.conclusion||"",2);
+  drawFooter();
+  return pdf.output("blob")
+}
+async function exportPdfToDownload(){
+  const d=getFormData();const fc=Object.values(d).filter(v=>v.trim()).length;
+  if(fc<2){setStatus("Complete al menos Nombre y algún hallazgo.","warn");vibrate([10,50,10]);return}
+  try{setStatus("Generando PDF...","info");const fileName=buildFileName();const blob=await generatePdfBlob();const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download=fileName;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+    addToHistory("local",{fileName});setStatus("PDF exportado y agregado al historial.","ok");vibrate([40,60,40])}catch(e){setStatus(`Error: ${e.message}`,"danger")}
+}
+
+/* ── GOOGLE DRIVE ── */
+function getGoogleToken(){return new Promise((resolve,reject)=>{
+  if(!window.google||!google.accounts?.oauth2){reject(new Error("GIS no disponible"));return}
+  if(!app.settings.googleClientId){reject(new Error("Falta Client ID"));return}
+  app.googleTokenClient=google.accounts.oauth2.initTokenClient({client_id:app.settings.googleClientId,scope:"https://www.googleapis.com/auth/drive.file",callback:r=>{if(r.error){reject(new Error(r.error));return}resolve(r.access_token)}});
+  app.googleTokenClient.requestAccessToken({prompt:"consent"})
+})}
+async function savePdfToDrive(){
+  try{setStatus("Autorizando Google Drive...","info");const token=await getGoogleToken();setStatus("Generando PDF para Drive...","info");const blob=await generatePdfBlob();
+    const fileName=buildFileName();
+    const folderId=(app.settings.driveFolderId||"").trim();
+    const meta={name:fileName,mimeType:"application/pdf"};
+    if(folderId)meta.parents=[folderId];
+    const form=new FormData();form.append("metadata",new Blob([JSON.stringify(meta)],{type:"application/json"}));form.append("file",blob,meta.name);
+    const up=await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink",{method:"POST",headers:{Authorization:`Bearer ${token}`},body:form});
+    if(!up.ok){const t=await up.text();throw new Error(t)}const u=await up.json();
+    addToHistory("drive",{fileName,driveFileId:u.id||"",driveUrl:u.webViewLink||(u.id?`https://drive.google.com/file/d/${u.id}/view`:"")});
+    setStatus(`PDF guardado en Drive: ${u.name||meta.name}`,"ok");vibrate([50,70,50])}catch(e){setStatus(`Error Drive: ${e.message}`,"danger");console.error("Drive upload error:",e)}
+}
+
+/* ── CLEAR ── */
+function clearForm(){el.fields.forEach(f=>{f.value=""});el.aiResult.value="";el.transcriptEditor.value="";app.transcriptBase="";app.transcriptBuffer="";app.activeField=null;if(el.sidebarActiveLabel)el.sidebarActiveLabel.textContent="Ninguna";updateModalTitle();updateDictationEntry();el.fields.forEach(f=>f.classList.remove("active-target"));setStatus("Formulario limpio.","ok");clearDraft();updateReportProgress();vibrate(15)}
+function requestClearForm(){if(hasDraftData()&&!confirm("¿Crear un nuevo reporte y borrar el formulario actual?"))return;clearForm()}
+
+/* ── SETTINGS ── */
+function saveSettings(){app.settings.whisperApiKey=el.whisperApiKey.value.trim();app.settings.whisperModel=el.whisperModel.value.trim()||DEFAULT_SETTINGS.whisperModel;app.settings.openaiKey=el.openaiKey.value.trim();app.settings.openaiModel=el.openaiModel.value.trim()||DEFAULT_SETTINGS.openaiModel;app.settings.googleClientId=el.googleClientId.value.trim();app.settings.driveFolderId=el.driveFolderId.value.trim();localStorage.setItem(SETTINGS_KEY,JSON.stringify(app.settings));setStatus("Configuración guardada.","ok");vibrate([20,30,20])}
+function loadSettings(){const r=localStorage.getItem(SETTINGS_KEY);if(!r)app.settings={...DEFAULT_SETTINGS};else try{app.settings={...DEFAULT_SETTINGS,...JSON.parse(r)}}catch(e){app.settings={...DEFAULT_SETTINGS}}el.whisperApiKey.value=app.settings.whisperApiKey;el.whisperModel.value=app.settings.whisperModel;el.openaiKey.value=app.settings.openaiKey;el.openaiModel.value=app.settings.openaiModel;el.googleClientId.value=app.settings.googleClientId;el.driveFolderId.value=app.settings.driveFolderId}
+function handleLogoUpload(inputEl,side){const file=inputEl.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{const r=String(reader.result||"");if(side==="left"){el.logoLeft.src=r;app.settings.logoLeft=r}else{el.logoRight.src=r;app.settings.logoRight=r}localStorage.setItem(SETTINGS_KEY,JSON.stringify(app.settings));setStatus("Logo actualizado.","ok");vibrate(15)};reader.readAsDataURL(file)}
+
+/* ── EVENTS ── */
+function attachEvents(){
+  el.fields.forEach(f=>{f.addEventListener("focus",()=>setActiveField(f));f.addEventListener("click",()=>setActiveField(f));f.addEventListener("dblclick",()=>{setActiveField(f);openModal()});f.addEventListener("input",()=>saveDraft())});
+  if(el.transcriptEditor)el.transcriptEditor.addEventListener("input",saveDraft);
+  if(el.aiResult)el.aiResult.addEventListener("input",()=>{setReviewProminent(true);saveDraft()});
+  el.btnStartVoice.addEventListener("click",startVoice);el.btnPauseVoice.addEventListener("click",pauseVoice);
+  el.btnStopVoice.addEventListener("click",finalizeVoice);el.btnInsertTranscript.addEventListener("click",insertTranscriptToActiveField);
+  el.btnCancelVoice.addEventListener("click",cancelVoice);el.btnReviewField.addEventListener("click",()=>runAiReview("field"));
+  el.btnApplyAiToField.addEventListener("click",applyAiTextToField);el.btnExportPdf.addEventListener("click",exportPdfToDownload);
+  el.btnSaveDrive.addEventListener("click",savePdfToDrive);el.btnSaveSettings.addEventListener("click",saveSettings);
+  if(el.btnClearForm)el.btnClearForm.addEventListener("click",requestClearForm);
+  if(el.btnClearFormSidebar)el.btnClearFormSidebar.addEventListener("click",requestClearForm);
+  if(el.btnOpenDictation)el.btnOpenDictation.addEventListener("click",()=>{if(!app.activeField){setStatus("Seleccione una casilla.","warn");return}openModal()});
+  if(el.btnFechaHoy)el.btnFechaHoy.addEventListener("click",()=>{const n=new Date();const ff=el.fields.find(f=>f.dataset.field==="fecha");if(ff){ff.value=`${String(n.getDate()).padStart(2,"0")}/${String(n.getMonth()+1).padStart(2,"0")}/${n.getFullYear()}`;saveDraft();setStatus(`Fecha: ${ff.value}`,"ok");vibrate(10)}});
+  if(el.btnOpenModal)el.btnOpenModal.addEventListener("click",()=>{if(!app.activeField){setStatus("Seleccione una casilla.","warn");return}openModal()});
+  el.btnCloseModal.addEventListener("click",closeModal);el.modalBackdrop.addEventListener("click",e=>{if(e.target===el.modalBackdrop)closeModal()});
+  el.logoLeftUpload.addEventListener("change",()=>handleLogoUpload(el.logoLeftUpload,"left"));
+  el.logoRightUpload.addEventListener("change",()=>handleLogoUpload(el.logoRightUpload,"right"));
+  if(el.btnOpenSettings)el.btnOpenSettings.addEventListener("click",openSettingsModal);
+  if(el.btnCloseSettings)el.btnCloseSettings.addEventListener("click",closeSettingsModal);
+  if(el.settingsBackdrop)el.settingsBackdrop.addEventListener("click",e=>{if(e.target===el.settingsBackdrop)closeSettingsModal()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(el.modalBackdrop.classList.contains("open"))closeModal();if(el.settingsBackdrop.classList.contains("open"))closeSettingsModal();if(el.historyBackdrop?.classList.contains("open"))closeHistoryModal()}});
+  if(el.btnOpenHistory)el.btnOpenHistory.addEventListener("click",openHistoryModal);
+  if(el.btnCloseHistory)el.btnCloseHistory.addEventListener("click",closeHistoryModal);
+  if(el.historyBackdrop)el.historyBackdrop.addEventListener("click",e=>{if(e.target===el.historyBackdrop)closeHistoryModal()});
+  if(el.historySearch)el.historySearch.addEventListener("input",()=>renderHistory(el.historySearch.value||""));
+  if(el.btnSaveSnapshot)el.btnSaveSnapshot.addEventListener("click",saveCurrentSnapshot);
+  if(el.btnClearHistory)el.btnClearHistory.addEventListener("click",()=>{if(!confirm("¿Borrar todo el historial?"))return;saveHistory([]);renderHistory("");setStatus("Historial borrado.","ok")});
+  if(el.historyList)el.historyList.addEventListener("click",async ev=>{const t=ev.target.closest("button[data-ha]");if(!t)return;const a=t.getAttribute("data-ha"),id=t.getAttribute("data-hid");if(!id)return;if(a==="load"){loadHistoryRecord(id);closeHistoryModal()}else if(a==="export")await exportHistoryRecord(id);else if(a==="delete")deleteHistoryRecord(id);else if(a==="open-drive"){const r=getHistory().find(i=>i.id===id);if(r?.driveUrl)window.open(r.driveUrl,"_blank","noopener,noreferrer")}});
+  updateKeyboardVH();if(window.visualViewport){window.visualViewport.addEventListener("resize",updateKeyboardVH);window.visualViewport.addEventListener("scroll",updateKeyboardVH)}else window.addEventListener("resize",updateKeyboardVH);
+}
+
+/* ── INIT ── */
+function init(){cacheEls();setRecordingUI(false);loadSettings();restoreDraft();updateAutosaveStatus();updateReportProgress();updateDictationEntry();setupNavGuard();setupVoice();attachEvents();if(app.voiceSupported)setStatus("Listo. Toque una casilla para escribir o dictar.","info")}
+init();
+</script>
+</body>
+</html>
