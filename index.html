@@ -212,14 +212,14 @@ body.keyboard-open .modal-body{padding-bottom:18px}
     <main class="report-container">
       <article class="report-page" id="reportPage">
         <header class="report-header">
-          <div class="logo-box"><img id="logoLeft" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='30' r='22' fill='%23123c76'/%3E%3Crect x='36' y='48' width='6' height='38' fill='%23123c76' rx='2'/%3E%3Crect x='58' y='48' width='6' height='38' fill='%23123c76' rx='2'/%3E%3Cline x1='20' y1='52' x2='80' y2='52' stroke='%23123c76' stroke-width='2'/%3E%3C/svg%3E" alt="Logo"></div>
+          <div class="logo-box"><img id="logoLeft" src="assets/logo-clinica-la-salud.png" alt="Clínica Médica La Salud"></div>
           <div class="header-center">
             <h2>Clínica Médica La Salud</h2>
             <p>Médico Ultrasonografista: Dra. Mariana López</p>
             <p>B. El Centro, Siguatepeque, Comayagua</p>
             <p>Tel: 9645-1203</p>
           </div>
-          <div class="logo-box"><img id="logoRight" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='15' y='20' width='70' height='60' rx='8' fill='%23dcecf3' stroke='%23123c76' stroke-width='2'/%3E%3Ccircle cx='50' cy='50' r='18' fill='none' stroke='%23123c76' stroke-width='2'/%3E%3Cline x1='50' y1='32' x2='50' y2='68' stroke='%23123c76' stroke-width='1.5'/%3E%3Cline x1='32' y1='50' x2='68' y2='50' stroke='%23123c76' stroke-width='1.5'/%3E%3C/svg%3E" alt="Ultrasonido"></div>
+          <div class="logo-box"><img id="logoRight" src="assets/icono-ultrasonido.png" alt="Icono de ultrasonido"></div>
         </header>
 
         <h3 class="section-title">Reporte de Ultrasonido Abdominal</h3>
@@ -938,7 +938,7 @@ function requestClearForm(){if(hasDraftData()&&!confirm("¿Crear un nuevo report
 
 /* ── SETTINGS ── */
 function saveSettings(){app.settings.whisperApiKey=el.whisperApiKey.value.trim();app.settings.whisperModel=el.whisperModel.value.trim()||DEFAULT_SETTINGS.whisperModel;app.settings.openaiKey=el.openaiKey.value.trim();app.settings.openaiModel=el.openaiModel.value.trim()||DEFAULT_SETTINGS.openaiModel;app.settings.googleClientId=el.googleClientId.value.trim();app.settings.driveFolderId=el.driveFolderId.value.trim();localStorage.setItem(SETTINGS_KEY,JSON.stringify(app.settings));setStatus("Configuración guardada.","ok");vibrate([20,30,20])}
-function loadSettings(){const r=localStorage.getItem(SETTINGS_KEY);if(!r)app.settings={...DEFAULT_SETTINGS};else try{app.settings={...DEFAULT_SETTINGS,...JSON.parse(r)}}catch(e){app.settings={...DEFAULT_SETTINGS}}el.whisperApiKey.value=app.settings.whisperApiKey;el.whisperModel.value=app.settings.whisperModel;el.openaiKey.value=app.settings.openaiKey;el.openaiModel.value=app.settings.openaiModel;el.googleClientId.value=app.settings.googleClientId;el.driveFolderId.value=app.settings.driveFolderId}
+function loadSettings(){const r=localStorage.getItem(SETTINGS_KEY);if(!r)app.settings={...DEFAULT_SETTINGS};else try{app.settings={...DEFAULT_SETTINGS,...JSON.parse(r)}}catch(e){app.settings={...DEFAULT_SETTINGS}}el.whisperApiKey.value=app.settings.whisperApiKey;el.whisperModel.value=app.settings.whisperModel;el.openaiKey.value=app.settings.openaiKey;el.openaiModel.value=app.settings.openaiModel;el.googleClientId.value=app.settings.googleClientId;el.driveFolderId.value=app.settings.driveFolderId;if(app.settings.logoLeft)el.logoLeft.src=app.settings.logoLeft;if(app.settings.logoRight)el.logoRight.src=app.settings.logoRight}
 function handleLogoUpload(inputEl,side){const file=inputEl.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{const r=String(reader.result||"");if(side==="left"){el.logoLeft.src=r;app.settings.logoLeft=r}else{el.logoRight.src=r;app.settings.logoRight=r}localStorage.setItem(SETTINGS_KEY,JSON.stringify(app.settings));setStatus("Logo actualizado.","ok");vibrate(15)};reader.readAsDataURL(file)}
 
 /* ── EVENTS ── */
