@@ -461,7 +461,7 @@ const HISTORY_MAX = 120;
 const WHATSAPP_DIRECT_PHONE = "50432478786";
 
 const app = {activeField:null,mediaRecorder:null,mediaStream:null,audioChunks:[],isListening:false,isPaused:false,recordingCanceled:false,voiceSupported:true,
-  transcriptBase:"",transcriptBuffer:"",guardEnabled:true,settings:{...DEFAULT_SETTINGS},googleTokenClient:null,pdfBlob:null,pdfFileName:"",pdfUrl:""};
+  transcriptBase:"",transcriptBuffer:"",lastTranscriptFieldId:null,lastTranscriptOriginal:"",guardEnabled:true,settings:{...DEFAULT_SETTINGS},googleTokenClient:null,pdfBlob:null,pdfFileName:"",pdfUrl:""};
 const el = {};
 
 /* ── UTILS ── */
@@ -546,6 +546,19 @@ function setReviewProminent(on){
   if(el.reviewPanel)el.reviewPanel.classList.toggle("is-prominent",on);
   if(on&&el.reviewPanel)el.reviewPanel.scrollIntoView({block:"nearest",behavior:"smooth"})
 }
+function syncTranscriptFromActiveField(force=false){
+  if(!app.activeField||app.isListening||!el.transcriptEditor)return;
+  const fieldId=app.activeField.dataset.field;
+  const fieldValue=app.activeField.value.trim();
+  const editorValue=el.transcriptEditor.value.trim();
+  const switching=app.lastTranscriptFieldId!==fieldId;
+  const unchanged=editorValue===app.lastTranscriptOriginal;
+  if(force||switching||!editorValue||unchanged){
+    el.transcriptEditor.value=fieldValue;
+    app.lastTranscriptFieldId=fieldId;
+    app.lastTranscriptOriginal=fieldValue;
+  }
+}
 
 /* ── ACTIVE FIELD ── */
 function setActiveField(field){
@@ -557,7 +570,7 @@ function setActiveField(field){
   updateModalTitle(); vibrate(8);
   setStatus(`Casilla activa: ${label}. Puede escribir o abrir dictado.`,"info");
   updateDictationEntry();
-  if(!app.isListening){el.transcriptEditor.value="";app.transcriptBase="";app.transcriptBuffer=""}
+  if(!app.isListening){app.transcriptBase="";app.transcriptBuffer="";syncTranscriptFromActiveField()}
 }
 function updateModalTitle(){
   const label=app.activeField?FIELD_LABELS[app.activeField.dataset.field]||app.activeField.dataset.field:"Ninguna";
@@ -594,7 +607,7 @@ function setupNavGuard(){
 
 /* ── MODAL ── */
 function openModal(){updateKeyboardVH();el.modalBackdrop.classList.add("open");document.body.style.overflow="hidden";
-  if(!app.isListening){el.transcriptEditor.value="";app.transcriptBase="";app.transcriptBuffer=""}setReviewProminent(false);updateModalTitle();vibrate(8)}
+  if(!app.isListening){app.transcriptBase="";app.transcriptBuffer="";syncTranscriptFromActiveField(true)}setReviewProminent(false);updateModalTitle();vibrate(8)}
 function closeModal(){
   if(app.isListening)cancelVoice();
   setReviewProminent(false);setRecordingUI(false);el.modalBackdrop.classList.remove("open");document.body.style.overflow="";document.body.classList.remove("keyboard-open");vibrate(8)
@@ -641,11 +654,9 @@ function closeHistoryModal(){el.historyBackdrop.classList.remove("open");documen
 function insertTranscriptToActiveField(){
   if(!app.activeField){setStatus("Seleccione una casilla antes de insertar.","warn");return}
   const text=norm(el.transcriptEditor.value);if(!text){setStatus("No hay texto para insertar.","warn");return}
-  const isLong=app.activeField.tagName==="TEXTAREA";
-  if(isLong&&app.activeField.value.trim())app.activeField.value=`${app.activeField.value.trim()} ${text}`;
-  else app.activeField.value=text;
+  app.activeField.value=text;
   setStatus("Texto insertado en la casilla.","ok");vibrate([30,50,30]);
-  app.transcriptBase="";app.transcriptBuffer="";el.transcriptEditor.value="";saveDraft();
+  app.transcriptBase="";app.transcriptBuffer="";app.lastTranscriptOriginal=text;el.transcriptEditor.value="";saveDraft();
   setTimeout(()=>closeModal(),600)
 }
 
@@ -796,9 +807,17 @@ function extractOpenAIText(data){
   return text.trim()
 }
 
+function syncOpenAIReviewSettings(){
+  const key=(el.openaiKey?.value||app.settings.openaiKey||"").trim();
+  const model=(el.openaiModel?.value||app.settings.openaiModel||DEFAULT_SETTINGS.openaiModel).trim()||DEFAULT_SETTINGS.openaiModel;
+  app.settings.openaiKey=key;app.settings.openaiModel=model;
+  if(el.openaiKey)el.openaiKey.value=key;if(el.openaiModel)el.openaiModel.value=model;
+  localStorage.setItem(SETTINGS_KEY,JSON.stringify(app.settings));
+  return {apiKey:key,model}
+}
+
 async function reviewWithOpenAI(promptText){
-  const apiKey=(app.settings.openaiKey||"").trim();if(!apiKey)throw new Error("Sin API Key");
-  const model=(app.settings.openaiModel||DEFAULT_SETTINGS.openaiModel).trim()||DEFAULT_SETTINGS.openaiModel;
+  const {apiKey,model}=syncOpenAIReviewSettings();if(!apiKey)throw new Error("Sin API Key");
   const resp=await fetch("https://api.openai.com/v1/responses",{
     method:"POST",
     headers:{"Content-Type":"application/json",Authorization:`Bearer ${apiKey}`},
@@ -806,7 +825,6 @@ async function reviewWithOpenAI(promptText){
       model,
       instructions:"Eres un verificador clínico de reportes de ultrasonido abdominal. No diagnostiques fuera del texto aportado, no inventes medidas ni hallazgos, y mantén salida breve en español.",
       input:promptText,
-      temperature:0.2,
       max_output_tokens:900
     })
   });
@@ -842,6 +860,7 @@ function reviewLocally({scope,fieldId,value,data}){
 }
 
 async function runAiReview(scope){
+  syncTranscriptFromActiveField();
   const data=getFormData();const fieldId=app.activeField?.dataset.field;
   const pending=el.transcriptEditor?.value?.trim()||"";const fieldVal=app.activeField?.value?.trim()||"";
   const value=scope==="field"?(pending||fieldVal):fieldVal;
@@ -850,10 +869,10 @@ async function runAiReview(scope){
   setReviewProminent(true);setStatus("Analizando con IA... revise el panel resaltado.","info");if(el.aiResult)el.aiResult.value="";
   try{
     const prompt=getReviewPrompt({scope,fieldId,value,data});
-    const result=app.settings.openaiKey?await reviewWithOpenAI(prompt):reviewLocally({scope,fieldId,value,data});
+    const result=syncOpenAIReviewSettings().apiKey?await reviewWithOpenAI(prompt):reviewLocally({scope,fieldId,value,data});
     el.aiResult.value=result;setReviewProminent(true);setStatus("Revisión completada. Verifique el panel resaltado antes de aplicar.","ok");vibrate([30,40,30])
   }catch(e){setStatus("OpenAI no respondió. Revisión local.","warn");
-    el.aiResult.value=reviewLocally({scope,fieldId,value,data})+`\n\nNOTA: OpenAI no disponible. Verifique API Key/modelo en ⚙.`;setReviewProminent(true);
+    el.aiResult.value=reviewLocally({scope,fieldId,value,data})+`\n\nNOTA: OpenAI no disponible. Detalle: ${e.message}`;setReviewProminent(true);
     console.error("OpenAI review error:",e)}
 }
 function applyAiTextToField(){
@@ -1010,7 +1029,7 @@ async function savePdfToDrive(){
 }
 
 /* ── CLEAR ── */
-function clearForm(){el.fields.forEach(f=>{f.value=""});el.aiResult.value="";el.transcriptEditor.value="";app.transcriptBase="";app.transcriptBuffer="";app.activeField=null;if(el.sidebarActiveLabel)el.sidebarActiveLabel.textContent="Ninguna";updateModalTitle();updateDictationEntry();el.fields.forEach(f=>f.classList.remove("active-target"));setStatus("Formulario limpio.","ok");clearDraft();updateReportProgress();vibrate(15)}
+function clearForm(){el.fields.forEach(f=>{f.value=""});el.aiResult.value="";el.transcriptEditor.value="";app.transcriptBase="";app.transcriptBuffer="";app.lastTranscriptFieldId=null;app.lastTranscriptOriginal="";app.activeField=null;if(el.sidebarActiveLabel)el.sidebarActiveLabel.textContent="Ninguna";updateModalTitle();updateDictationEntry();el.fields.forEach(f=>f.classList.remove("active-target"));setStatus("Formulario limpio.","ok");clearDraft();updateReportProgress();vibrate(15)}
 function requestClearForm(){if(hasDraftData()&&!confirm("¿Crear un nuevo reporte y borrar el formulario actual?"))return;clearForm()}
 
 /* ── SETTINGS ── */
