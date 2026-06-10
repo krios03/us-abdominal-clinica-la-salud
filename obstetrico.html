@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-:root{--bg:#edf4f6;--panel:#fff;--ink:#1d232b;--muted:#4f5d6e;--brand:#155e75;--brand-dark:#0e485b;--ok:#20603d;--warn:#8a5a00;--danger:#8f1d1d;--line:#222}
+:root{--bg:#edf4f6;--panel:#fff;--ink:#1d232b;--muted:#4f5d6e;--brand:#155e75;--brand-dark:#0e485b;--ok:#20603d;--warn:#8a5a00;--danger:#8f1d1d;--line:#222;--keyboard-offset:0px}
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;font-family:"Atkinson Hyperlegible Next",sans-serif;background:var(--bg);color:var(--ink);-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 input,textarea,button{-webkit-user-select:text;user-select:text}
@@ -165,8 +165,9 @@ body.editing-transcript #btnConfirmTranscriptEdit{display:inline-flex}
 .pdf-render .field-line input{font-size:14px!important;height:30px!important;padding:3px 3px 7px!important;line-height:1.35!important;overflow:visible!important}
 .pdf-render .field-block textarea{font-size:13px!important;min-height:60px!important;overflow:visible!important;white-space:pre-wrap!important;word-wrap:break-word!important;height:auto!important}
 .pdf-render .field-block{min-height:.95in!important;overflow:visible!important;height:auto!important}
-.dictation-fab{position:fixed;right:14px;bottom:14px;z-index:50;box-shadow:0 10px 22px rgba(21,94,117,.24);display:none}
+.dictation-fab{position:fixed;right:14px;bottom:calc(14px + var(--keyboard-offset,0px));z-index:90;box-shadow:0 10px 22px rgba(21,94,117,.24);display:none;transition:bottom .18s ease,transform .18s ease}
 .dictation-fab.visible{display:inline-flex}
+body.keyboard-open .dictation-fab.visible{transform:translateY(-6px);min-height:42px;font-size:.86rem;padding:8px 10px}
 @media(min-width:1060px){
 .app-shell{max-width:1500px;margin:0 auto;padding:16px}
 .app-bar{border-radius:14px;margin-bottom:12px;padding:12px 18px}
@@ -523,9 +524,13 @@ function vibrate(d=10){if(navigator.vibrate)navigator.vibrate(d)}
 function norm(t){return t.replace(/\s+/g," ").replace(/\s([,.;:])/g,"$1").trim()}
 const baseVH = window.innerHeight;
 function updateKeyboardVH(){
-  const vh = window.visualViewport?.height || window.innerHeight;
+  const viewport=window.visualViewport;
+  const vh=viewport?.height||window.innerHeight;
+  const top=viewport?.offsetTop||0;
+  const keyboardOffset=Math.max(0, window.innerHeight - vh - top);
   document.documentElement.style.setProperty("--visual-vh",`${vh}px`);
-  document.body.classList.toggle("keyboard-open", vh < baseVH - 120);
+  document.documentElement.style.setProperty("--keyboard-offset",`${keyboardOffset}px`);
+  document.body.classList.toggle("keyboard-open", keyboardOffset > 80 || vh < baseVH - 120);
 }
 
 /* ── CACHE ELEMENTS ── */
