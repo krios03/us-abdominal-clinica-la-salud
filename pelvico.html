@@ -1166,9 +1166,10 @@ async function savePdfToDrive(){
 
 /* ?? PWA ?? */
 function setupPwaInstall(){
-  if("serviceWorker" in navigator)navigator.serviceWorker.register("service-worker.js").catch(e=>console.warn("SW registration failed",e));
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("service-worker.js?v=20260610-refresh").then(r=>r.update()).catch(e=>console.warn("SW registration failed",e));
   window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();app.deferredInstallPrompt=e;if(el.btnInstallPwa)el.btnInstallPwa.disabled=false});
-  window.addEventListener("appinstalled",()=>{app.deferredInstallPrompt=null;setStatus("App instalada correctamente.","ok")})
+  window.addEventListener("appinstalled",()=>{app.deferredInstallPrompt=null;setStatus("App instalada correctamente.","ok")});
+  navigator.serviceWorker?.addEventListener?.("controllerchange",()=>{if(!sessionStorage.getItem("swReloaded")){sessionStorage.setItem("swReloaded","1");location.reload()}})
 }
 async function installPwa(){
   if(!app.deferredInstallPrompt){setStatus("Si no aparece el instalador, use el menú del navegador: Agregar a pantalla de inicio.","info");return}
