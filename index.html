@@ -922,7 +922,12 @@ function applyAiTextToField(){
   const m=el.aiResult.value.match(/TEXTO_MEJORADO:\s*([\s\S]*?)(?:\n\s*COHERENCIA:|\n\s*SUGERENCIAS:)/i);
   const suggested=m?norm(m[1]):norm(el.aiResult.value);
   if(!suggested){setStatus("No se encontró texto sugerido.","warn");return}
-  app.activeField.value=suggested;setReviewProminent(false);setStatus("Texto aplicado.","ok");saveDraft();vibrate([30,50,30])
+  el.transcriptEditor.value=suggested;
+  app.lastTranscriptFieldId=app.activeField.dataset.field;
+  app.lastTranscriptOriginal=suggested;
+  el.transcriptEditor.focus();
+  el.transcriptEditor.scrollTop=0;
+  setReviewProminent(false);setStatus("Texto mejorado copiado al área grande. Revíselo y toque Insertar en casilla.","ok");saveDraft();vibrate([30,50,30])
 }
 
 /* ── PDF ── */
