@@ -10,6 +10,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Atkinson+Hyperlegible+Next:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#155e75">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ultrasonidos">
+<link rel="apple-touch-icon" href="assets/pwa-icon-192.png">
 <style>
 :root{--bg:#edf4f6;--panel:#fff;--ink:#1d232b;--muted:#4f5d6e;--brand:#155e75;--brand-dark:#0e485b;--ok:#20603d;--warn:#8a5a00;--danger:#8f1d1d;--line:#222;--keyboard-offset:0px}
 *,*::before,*::after{box-sizing:border-box}
@@ -238,6 +244,11 @@ body.editing-transcript .dictation-actions #btnInsertTranscript{order:5}
 body.editing-transcript .dictation-actions .review-panel{display:none}
 body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-height:calc(var(--visual-vh, 100dvh) - 190px);overflow-y:auto!important}
 }
+
+#btnSaveDrive,.drive-settings{display:none!important}
+.install-pwa-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.install-pwa-actions .btn{min-height:42px}
+
 </style>
 </head>
 <body>
@@ -379,10 +390,15 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
           <label>API Key OpenAI<input type="password" id="openaiKey" placeholder="sk-..."></label>
           <label>Modelo<input type="text" id="openaiModel" placeholder="gpt-5-mini"></label>
         </div>
-        <div class="settings-group">
+        <div class="settings-group drive-settings" aria-hidden="true">
           <h4>Google Drive</h4>
           <label>Client ID<input type="text" id="googleClientId" placeholder="Google OAuth Client ID"></label>
           <label>ID Carpeta Drive<input type="text" id="driveFolderId" placeholder="Folder ID"></label>
+        </div>
+        <div class="settings-group">
+          <h4>Instalar en el tel?fono</h4>
+          <div class="install-pwa-actions"><button class="btn primary" id="btnInstallPwa" type="button">Instalar app</button></div>
+          <p class="settings-note">Permite agregar esta app a la pantalla de inicio. Si el navegador no muestra el instalador, use “Agregar a pantalla de inicio” desde el menú del navegador.</p>
         </div>
         <div class="settings-group">
           <h4>Logos del reporte</h4>
@@ -470,7 +486,7 @@ const HISTORY_MAX = 120;
 const WHATSAPP_DIRECT_PHONE = "50432478786";
 
 const app = {activeField:null,mediaRecorder:null,mediaStream:null,audioChunks:[],isListening:false,isPaused:false,recordingCanceled:false,voiceSupported:true,
-  transcriptBase:"",transcriptBuffer:"",lastTranscriptFieldId:null,lastTranscriptOriginal:"",guardEnabled:true,settings:{...DEFAULT_SETTINGS},googleTokenClient:null,pdfBlob:null,pdfFileName:"",pdfUrl:""};
+  transcriptBase:"",transcriptBuffer:"",lastTranscriptFieldId:null,lastTranscriptOriginal:"",guardEnabled:true,settings:{...DEFAULT_SETTINGS},googleTokenClient:null,pdfBlob:null,pdfFileName:"",pdfUrl:"",deferredInstallPrompt:null};
 const el = {};
 
 /* ── UTILS ── */
@@ -509,7 +525,7 @@ function cacheEls(){
   el.btnFechaHoy=document.getElementById("btnFechaHoy");
   el.whisperApiKey=document.getElementById("whisperApiKey"); el.whisperModel=document.getElementById("whisperModel");
   el.openaiKey=document.getElementById("openaiKey"); el.openaiModel=document.getElementById("openaiModel");
-  el.googleClientId=document.getElementById("googleClientId"); el.driveFolderId=document.getElementById("driveFolderId");
+  el.googleClientId=document.getElementById("googleClientId"); el.driveFolderId=document.getElementById("driveFolderId"); el.btnInstallPwa=document.getElementById("btnInstallPwa");
   el.logoLeft=document.getElementById("logoLeft"); el.logoRight=document.getElementById("logoRight");
   el.logoLeftUpload=document.getElementById("logoLeftUpload"); el.logoRightUpload=document.getElementById("logoRightUpload");
   el.modalBackdrop=document.getElementById("modalBackdrop"); el.modalSheet=document.querySelector("#modalBackdrop .modal-sheet");
@@ -1094,6 +1110,19 @@ async function savePdfToDrive(){
 }
 
 /* ── CLEAR ── */
+
+/* ?? PWA ?? */
+function setupPwaInstall(){
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("service-worker.js").catch(e=>console.warn("SW registration failed",e));
+  window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();app.deferredInstallPrompt=e;if(el.btnInstallPwa)el.btnInstallPwa.disabled=false});
+  window.addEventListener("appinstalled",()=>{app.deferredInstallPrompt=null;setStatus("App instalada correctamente.","ok")})
+}
+async function installPwa(){
+  if(!app.deferredInstallPrompt){setStatus("Si no aparece el instalador, use el menú del navegador: Agregar a pantalla de inicio.","info");return}
+  const promptEvent=app.deferredInstallPrompt;app.deferredInstallPrompt=null;promptEvent.prompt();
+  const choice=await promptEvent.userChoice;if(choice?.outcome==="accepted")setStatus("Instalación iniciada.","ok");else setStatus("Instalación cancelada.","info")
+}
+
 function clearForm(){el.fields.forEach(f=>{f.value=""});el.aiResult.value="";el.transcriptEditor.value="";app.transcriptBase="";app.transcriptBuffer="";app.lastTranscriptFieldId=null;app.lastTranscriptOriginal="";app.activeField=null;if(el.sidebarActiveLabel)el.sidebarActiveLabel.textContent="Ninguna";updateModalTitle();updateDictationEntry();el.fields.forEach(f=>f.classList.remove("active-target"));setStatus("Formulario limpio.","ok");clearDraft();updateReportProgress();vibrate(15)}
 function requestClearForm(){if(hasDraftData()&&!confirm("¿Crear un nuevo reporte y borrar el formulario actual?"))return;clearForm()}
 
@@ -1116,7 +1145,7 @@ function attachEvents(){
   el.btnStopVoice.addEventListener("click",finalizeVoice);el.btnInsertTranscript.addEventListener("click",insertTranscriptToActiveField);
   el.btnCancelVoice.addEventListener("click",cancelVoice);el.btnReviewField.addEventListener("click",()=>runAiReview("field"));
   el.btnApplyAiToField.addEventListener("click",applyAiTextToField);el.btnExportPdf.addEventListener("click",exportPdfToDownload);
-  el.btnSaveDrive.addEventListener("click",savePdfToDrive);el.btnSaveSettings.addEventListener("click",saveSettings);
+  if(el.btnSaveDrive)el.btnSaveDrive.addEventListener("click",savePdfToDrive);if(el.btnInstallPwa)el.btnInstallPwa.addEventListener("click",installPwa);el.btnSaveSettings.addEventListener("click",saveSettings);
   if(el.btnClearForm)el.btnClearForm.addEventListener("click",requestClearForm);
   if(el.btnClearFormSidebar)el.btnClearFormSidebar.addEventListener("click",requestClearForm);
   if(el.btnOpenDictation)el.btnOpenDictation.addEventListener("click",()=>{if(!app.activeField){setStatus("Seleccione una casilla.","warn");return}openModal()});
@@ -1147,6 +1176,7 @@ function attachEvents(){
 /* ── INIT ── */
 function init(){cacheEls();setRecordingUI(false);loadSettings();restoreDraft();updateAutosaveStatus();updateReportProgress();updateDictationEntry();setupNavGuard();setupVoice();attachEvents();if(app.voiceSupported)setStatus("Listo. Toque una casilla para escribir o dictar.","info")}
 init();
+setupPwaInstall();
 </script>
 </body>
 </html>
