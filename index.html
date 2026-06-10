@@ -80,6 +80,7 @@ body.keyboard-open .dictation-main .transcript-box{min-height:calc(var(--visual-
 body.keyboard-open .dictation-actions{display:none}
 body.editing-transcript .dictation-sheet .status-inline{display:none}
 body.editing-transcript .dictation-main .transcript-box{min-height:54dvh}
+body.editing-transcript #btnConfirmTranscriptEdit{display:inline-flex}
 .modal-body .status-inline{font-size:.82rem;padding:8px 10px;border-radius:8px;border-left:4px solid var(--brand);background:#e9f4f9;font-weight:600}
 .modal-body textarea{width:100%;border:1px solid #bacad4;border-radius:10px;padding:10px;font-size:1rem;font-family:"Atkinson Hyperlegible Next",sans-serif;resize:vertical}
 .transcript-box{min-height:80px}
@@ -93,8 +94,10 @@ body.editing-transcript .dictation-main .transcript-box{min-height:54dvh}
 .dictation-sheet .status-inline{font-size:1.05rem;line-height:1.35;padding:12px 14px}
 .dictation-workspace{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:14px;min-height:0;flex:1}
 .dictation-main{display:flex;flex-direction:column;gap:10px;min-height:0}
+.transcript-edit-wrap{position:relative;display:flex;flex:1;min-height:0}
 .dictation-label{font-size:1rem;font-weight:800;color:var(--brand-dark)}
 .dictation-main .transcript-box{flex:1;min-height:320px;font-size:1.35rem;line-height:1.55;padding:16px;border:2px solid #9dc4d1;border-radius:8px;background:#fbfeff;color:#121820}
+#btnConfirmTranscriptEdit{display:none;position:absolute;right:12px;bottom:12px;z-index:2;width:54px;height:54px;min-width:54px;min-height:54px;border-radius:999px;font-size:1.35rem;box-shadow:0 8px 18px rgba(32,96,61,.28)}
 .dictation-actions{display:grid;grid-template-columns:1fr;align-content:start;gap:10px}
 .dictation-actions .btn{width:100%;min-height:58px;font-size:1.05rem;justify-content:center}
 .dictation-actions #btnInsertTranscript{min-height:68px;font-size:1.12rem}
@@ -336,7 +339,10 @@ body.editing-transcript .dictation-main .transcript-box{min-height:62dvh}
         <div class="dictation-workspace">
           <div class="dictation-main">
             <label class="dictation-label" for="transcriptEditor">Texto transcrito o escrito</label>
-            <textarea class="transcript-box" id="transcriptEditor" placeholder="Aquí aparece el dictamen en texto grande. Puede corregirlo antes de insertarlo en la casilla."></textarea>
+            <div class="transcript-edit-wrap">
+              <textarea class="transcript-box" id="transcriptEditor" placeholder="Aquí aparece el dictamen en texto grande. Puede corregirlo antes de insertarlo en la casilla."></textarea>
+              <button class="btn success" id="btnConfirmTranscriptEdit" aria-label="Aplicar edición">✓</button>
+            </div>
           </div>
           <div class="dictation-actions">
             <button class="btn" id="btnStartVoice">🎤 Dictar</button>
@@ -496,6 +502,7 @@ function cacheEls(){
   el.reviewPanel=document.getElementById("reviewPanel");
   el.btnStartVoice=document.getElementById("btnStartVoice"); el.btnPauseVoice=document.getElementById("btnPauseVoice");
   el.btnStopVoice=document.getElementById("btnStopVoice"); el.btnInsertTranscript=document.getElementById("btnInsertTranscript");
+  el.btnConfirmTranscriptEdit=document.getElementById("btnConfirmTranscriptEdit");
   el.btnCancelVoice=document.getElementById("btnCancelVoice"); el.btnReviewField=document.getElementById("btnReviewField");
   el.btnApplyAiToField=document.getElementById("btnApplyAiToField");
   el.btnOpenDictation=document.getElementById("btnOpenDictation");
@@ -623,6 +630,7 @@ function openModal(){updateKeyboardVH();el.modalBackdrop.classList.add("open");d
   if(!app.isListening){app.transcriptBase="";app.transcriptBuffer="";syncTranscriptFromActiveField(true)}setReviewProminent(false);updateModalTitle();vibrate(8)}
 function closeModal(){
   if(app.isListening)cancelVoice();
+  applyTranscriptEdit({closeAfter:false,silent:true});
   setReviewProminent(false);setRecordingUI(false);el.modalBackdrop.classList.remove("open");document.body.style.overflow="";document.body.classList.remove("keyboard-open","editing-transcript");vibrate(8)
 }
 function openSettingsModal(){updateKeyboardVH();el.settingsBackdrop.classList.add("open");document.body.style.overflow="hidden";vibrate(8)}
@@ -664,13 +672,17 @@ function openHistoryModal(){renderHistory(el.historySearch?.value||"");el.histor
 function closeHistoryModal(){el.historyBackdrop.classList.remove("open");document.body.style.overflow=""}
 
 /* ── INSERT ── */
-function insertTranscriptToActiveField(){
-  if(!app.activeField){setStatus("Seleccione una casilla antes de insertar.","warn");return}
-  const text=norm(el.transcriptEditor.value);if(!text){setStatus("No hay texto para insertar.","warn");return}
+function applyTranscriptEdit({closeAfter=false,silent=false}={}){
+  if(!app.activeField){if(!silent)setStatus("Seleccione una casilla antes de insertar.","warn");return false}
+  const text=norm(el.transcriptEditor.value);if(!text){if(!silent)setStatus("No hay texto para insertar.","warn");return false}
   app.activeField.value=text;
-  setStatus("Texto insertado en la casilla.","ok");vibrate([30,50,30]);
-  app.transcriptBase="";app.transcriptBuffer="";app.lastTranscriptOriginal=text;el.transcriptEditor.value="";saveDraft();
-  setTimeout(()=>closeModal(),600)
+  app.transcriptBase="";app.transcriptBuffer="";app.lastTranscriptFieldId=app.activeField.dataset.field;app.lastTranscriptOriginal=text;saveDraft();
+  if(!silent){setStatus("Edición aplicada a la casilla.","ok");vibrate([30,50,30])}
+  if(closeAfter){el.transcriptEditor.value="";setTimeout(()=>closeModal(),500)}
+  return true
+}
+function insertTranscriptToActiveField(){
+  applyTranscriptEdit({closeAfter:true})
 }
 
 /* ── VOICE / WHISPER ── */
@@ -1103,6 +1115,8 @@ function attachEvents(){
   if(el.transcriptEditor)el.transcriptEditor.addEventListener("input",saveDraft);
   if(el.transcriptEditor)el.transcriptEditor.addEventListener("focus",()=>{document.body.classList.add("editing-transcript");setTimeout(updateKeyboardVH,80)});
   if(el.transcriptEditor)el.transcriptEditor.addEventListener("blur",()=>{document.body.classList.remove("editing-transcript");setTimeout(updateKeyboardVH,80)});
+  if(el.btnConfirmTranscriptEdit)el.btnConfirmTranscriptEdit.addEventListener("pointerdown",e=>{e.preventDefault();applyTranscriptEdit({closeAfter:false})});
+  if(el.btnConfirmTranscriptEdit)el.btnConfirmTranscriptEdit.addEventListener("click",e=>{e.preventDefault();applyTranscriptEdit({closeAfter:false})});
   if(el.aiResult)el.aiResult.addEventListener("input",()=>{setReviewProminent(true);saveDraft()});
   el.btnStartVoice.addEventListener("click",startVoice);el.btnPauseVoice.addEventListener("click",pauseVoice);
   el.btnStopVoice.addEventListener("click",finalizeVoice);el.btnInsertTranscript.addEventListener("click",insertTranscriptToActiveField);
