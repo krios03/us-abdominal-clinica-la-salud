@@ -77,7 +77,7 @@ body.keyboard-open .dictation-sheet .status-inline{display:none}
 body.keyboard-open .dictation-workspace{display:flex;flex-direction:column;gap:6px}
 body.keyboard-open .dictation-main{flex:1;min-height:0}
 body.keyboard-open .dictation-label{font-size:.86rem}
-body.keyboard-open .dictation-main .transcript-box{min-height:calc(var(--visual-vh, 100dvh) - 210px);font-size:1.22rem;line-height:1.55}
+body.keyboard-open .dictation-main .transcript-box{min-height:calc(var(--visual-vh, 100dvh) - 210px);max-height:calc(var(--visual-vh, 100dvh) - 172px);font-size:1.22rem;line-height:1.55;overflow-y:auto!important}
 body.keyboard-open .dictation-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;position:sticky;bottom:0;z-index:6;background:rgba(255,255,255,.96);padding:6px 0 0;border-top:1px solid #d7e1e6}
 body.keyboard-open .dictation-actions .btn{min-height:34px;font-size:.72rem;padding:4px 5px;border-radius:7px}
 body.keyboard-open .dictation-actions #btnInsertTranscript{grid-column:1/-1;min-height:38px;font-size:.8rem}
@@ -114,7 +114,7 @@ body.editing-transcript #btnConfirmTranscriptEdit{display:inline-flex}
 .dictation-main{display:flex;flex-direction:column;gap:10px;min-height:0}
 .transcript-edit-wrap{position:relative;display:flex;flex:1;min-height:0}
 .dictation-label{font-size:1rem;font-weight:800;color:var(--brand-dark)}
-.dictation-main .transcript-box{flex:1;min-height:320px;font-size:1.35rem;line-height:1.55;padding:16px;border:2px solid #9dc4d1;border-radius:8px;background:#fbfeff;color:#121820}
+.dictation-main .transcript-box{flex:1;min-height:320px;max-height:100%;font-size:1.35rem;line-height:1.55;padding:16px 18px 72px 16px;border:2px solid #9dc4d1;border-radius:8px;background:#fbfeff;color:#121820;overflow-y:auto!important;resize:none;scrollbar-gutter:stable;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 #btnConfirmTranscriptEdit{display:none;position:absolute;right:12px;bottom:12px;z-index:2;width:54px;height:54px;min-width:54px;min-height:54px;border-radius:999px;font-size:1.35rem;box-shadow:0 8px 18px rgba(32,96,61,.28)}
 .dictation-actions{display:grid;grid-template-columns:1fr;align-content:start;gap:10px}
 .dictation-actions .btn{width:100%;min-height:58px;font-size:1.05rem;justify-content:center}
@@ -167,6 +167,7 @@ body.editing-transcript #btnConfirmTranscriptEdit{display:inline-flex}
 .pdf-render .field-block{min-height:.95in!important;overflow:visible!important;height:auto!important}
 .dictation-fab{position:fixed;right:14px;bottom:calc(14px + var(--keyboard-offset,0px));z-index:90;box-shadow:0 10px 22px rgba(21,94,117,.24);display:none;transition:bottom .18s ease,transform .18s ease}
 .dictation-fab.visible{display:inline-flex}
+body.modal-open .dictation-fab.visible{display:none!important}
 body.keyboard-open .dictation-fab.visible{transform:translateY(-6px);min-height:42px;font-size:.86rem;padding:8px 10px}
 @media(min-width:1060px){
 .app-shell{max-width:1500px;margin:0 auto;padding:16px}
@@ -219,7 +220,7 @@ body.keyboard-open .dictation-fab.visible{transform:translateY(-6px);min-height:
 .dictation-sheet .status-inline{font-size:.95rem}
 .dictation-workspace{display:flex;flex-direction:column;gap:8px;min-height:0;flex:1}
 .dictation-main{flex:1;min-height:0}
-.dictation-main .transcript-box{min-height:34dvh;font-size:1.2rem;line-height:1.5;padding:14px}
+.dictation-main .transcript-box{min-height:34dvh;font-size:1.2rem;line-height:1.5;padding:14px 16px 78px 14px;overflow-y:auto!important;resize:none}
 .dictation-actions{grid-template-columns:1fr 1fr;gap:8px;position:sticky;bottom:0;z-index:5;background:rgba(255,255,255,.97);padding-top:6px;border-top:1px solid #d7e1e6}
 .dictation-actions .btn{min-height:52px;font-size:.95rem}
 .dictation-actions #btnInsertTranscript{grid-column:1/-1;min-height:58px}
@@ -235,7 +236,7 @@ body.editing-transcript .dictation-actions #btnStopVoice{order:3}
 body.editing-transcript .dictation-actions #btnCancelVoice{order:4}
 body.editing-transcript .dictation-actions #btnInsertTranscript{order:5}
 body.editing-transcript .dictation-actions .review-panel{display:none}
-body.editing-transcript .dictation-main .transcript-box{min-height:40dvh}
+body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-height:calc(var(--visual-vh, 100dvh) - 190px);overflow-y:auto!important}
 }
 </style>
 </head>
@@ -666,12 +667,12 @@ function setupNavGuard(){
 }
 
 /* ── MODAL ── */
-function openModal(){document.body.classList.remove("editing-transcript");updateKeyboardVH();el.modalBackdrop.classList.add("open");document.body.style.overflow="hidden";
-  if(!app.isListening){app.transcriptBase="";app.transcriptBuffer="";syncTranscriptFromActiveField(true)}setReviewProminent(false);updateModalTitle();vibrate(8)}
+function openModal(){document.body.classList.remove("editing-transcript");document.body.classList.add("modal-open");updateKeyboardVH();el.modalBackdrop.classList.add("open");document.body.style.overflow="hidden";
+  if(!app.isListening){app.transcriptBase="";app.transcriptBuffer="";syncTranscriptFromActiveField(true);setTimeout(()=>{el.transcriptEditor.scrollTop=el.transcriptEditor.scrollHeight},80)}setReviewProminent(false);updateModalTitle();vibrate(8)}
 function closeModal(){
   if(app.isListening)cancelVoice();
   applyTranscriptEdit({closeAfter:false,silent:true});
-  setReviewProminent(false);setRecordingUI(false);el.modalBackdrop.classList.remove("open");document.body.style.overflow="";document.body.classList.remove("keyboard-open","editing-transcript");vibrate(8)
+  setReviewProminent(false);setRecordingUI(false);el.modalBackdrop.classList.remove("open");document.body.style.overflow="";document.body.classList.remove("keyboard-open","editing-transcript","modal-open");vibrate(8)
 }
 function openSettingsModal(){updateKeyboardVH();el.settingsBackdrop.classList.add("open");document.body.style.overflow="hidden";vibrate(8)}
 function closeSettingsModal(){el.settingsBackdrop.classList.remove("open");document.body.style.overflow="";document.body.classList.remove("keyboard-open");vibrate(8)}
@@ -1040,7 +1041,7 @@ function handleLogoUpload(inputEl,side){const file=inputEl.files?.[0];if(!file)r
 /* ── EVENTS ── */
 function attachEvents(){
   el.fields.forEach(f=>{f.addEventListener("focus",()=>setActiveField(f));f.addEventListener("click",()=>setActiveField(f));f.addEventListener("dblclick",()=>{setActiveField(f);openModal()});f.addEventListener("input",()=>saveDraft())});
-  if(el.transcriptEditor)el.transcriptEditor.addEventListener("input",saveDraft);
+  if(el.transcriptEditor)el.transcriptEditor.addEventListener("input",()=>{saveDraft();if(el.transcriptEditor.selectionStart>=el.transcriptEditor.value.length-1)el.transcriptEditor.scrollTop=el.transcriptEditor.scrollHeight});
   if(el.transcriptEditor)el.transcriptEditor.addEventListener("focus",()=>{document.body.classList.add("editing-transcript");setTimeout(updateKeyboardVH,80)});
   if(el.transcriptEditor)el.transcriptEditor.addEventListener("blur",()=>{document.body.classList.remove("editing-transcript");setTimeout(updateKeyboardVH,80)});
   if(el.btnConfirmTranscriptEdit)el.btnConfirmTranscriptEdit.addEventListener("pointerdown",e=>{e.preventDefault();applyTranscriptEdit({closeAfter:false})});
