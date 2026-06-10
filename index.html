@@ -411,11 +411,11 @@ body.keyboard-open .modal-body{padding-bottom:18px}
             <div class="share-file-name" id="pdfShareFileName">Reporte.pdf</div>
           </div>
           <div class="share-actions">
-            <button class="btn success" id="btnSharePdfFile">Compartir PDF por WhatsApp</button>
-            <button class="btn primary" id="btnSharePdfDirect">Enviar a +504 3247-8786</button>
+            <button class="btn success" id="btnSharePdfFile">Compartir PDF como archivo</button>
+            <button class="btn primary" id="btnSharePdfDirect">Descargar y abrir WhatsApp +504 3247-8786</button>
             <button class="btn" id="btnDownloadPdfReady">Descargar PDF</button>
           </div>
-          <p class="share-note" id="pdfShareNote">En teléfonos compatibles se comparte el archivo PDF directamente. Si el navegador no permite adjuntar archivos, se abrirá WhatsApp y podrá adjuntar el PDF descargado.</p>
+          <p class="share-note" id="pdfShareNote">WhatsApp no permite adjuntar automáticamente un PDF a un número específico desde la web. Para ese contacto, descargue el PDF y adjúntelo en el chat que se abrirá.</p>
         </div>
       </div>
     </div>
@@ -946,8 +946,8 @@ function setCurrentPdf(blob,fileName){
   const canShareFile=!!(navigator.canShare&&window.File&&navigator.canShare({files:[new File([blob],fileName,{type:"application/pdf"})]}));
   if(el.btnSharePdfFile)el.btnSharePdfFile.disabled=!canShareFile;
   if(el.pdfShareNote)el.pdfShareNote.textContent=canShareFile
-    ?"Puede compartir el archivo PDF directamente con WhatsApp u otra aplicación instalada."
-    :"Este navegador no permite adjuntar el PDF automáticamente. Descargue el archivo y se abrirá WhatsApp para enviarlo manualmente.";
+    ?"Use “Compartir PDF como archivo” para enviar el PDF con el menú del teléfono. Para el número fijo, use “Descargar y abrir WhatsApp” y adjunte el archivo descargado."
+    :"Este navegador no permite compartir el PDF como archivo. Use “Descargar y abrir WhatsApp” y adjunte el archivo descargado.";
 }
 function openPdfShareModal(){
   if(!app.pdfBlob){setStatus("Primero genere un PDF.","warn");return}
@@ -976,9 +976,10 @@ async function shareCurrentPdfFile(){
 }
 function openWhatsAppDirect(){
   if(!app.pdfBlob){setStatus("Primero genere un PDF.","warn");return}
-  const url=`https://wa.me/${WHATSAPP_DIRECT_PHONE}?text=${encodeURIComponent(getPdfShareText()+"\n\nAdjunto el PDF del reporte.")}`;
+  downloadCurrentPdf();
+  const url=`https://wa.me/${WHATSAPP_DIRECT_PHONE}?text=${encodeURIComponent(getPdfShareText()+"\n\nPor favor revise el PDF del reporte. El archivo debe adjuntarse desde la descarga del dispositivo.")}`;
   window.open(url,"_blank","noopener");
-  setStatus("WhatsApp abierto. Si no se adjunta solo, descargue el PDF y adjúntelo en el chat.","info");vibrate(10)
+  setStatus("PDF descargado y WhatsApp abierto. Adjunte el archivo descargado en el chat.","info");vibrate(10)
 }
 async function exportPdfToDownload(){
   const d=getFormData();const fc=Object.values(d).filter(v=>v.trim()).length;
