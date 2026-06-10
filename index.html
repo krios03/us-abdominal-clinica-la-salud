@@ -76,16 +76,26 @@ body.keyboard-open .dictation-sheet .status-inline{display:none}
 body.keyboard-open .dictation-workspace{display:flex;flex-direction:column;gap:6px}
 body.keyboard-open .dictation-main{flex:1;min-height:0}
 body.keyboard-open .dictation-label{font-size:.86rem}
-body.keyboard-open .dictation-main .transcript-box{min-height:calc(var(--visual-vh, 100dvh) - 164px);font-size:1.22rem;line-height:1.55}
-body.keyboard-open .dictation-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+body.keyboard-open .dictation-main .transcript-box{min-height:calc(var(--visual-vh, 100dvh) - 210px);font-size:1.22rem;line-height:1.55}
+body.keyboard-open .dictation-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;position:sticky;bottom:0;z-index:6;background:rgba(255,255,255,.96);padding:6px 0 0;border-top:1px solid #d7e1e6}
 body.keyboard-open .dictation-actions .btn{min-height:34px;font-size:.72rem;padding:4px 5px;border-radius:7px}
 body.keyboard-open .dictation-actions #btnInsertTranscript{grid-column:1/-1;min-height:38px;font-size:.8rem}
+body.keyboard-open .dictation-actions #btnStartVoice{order:1}
+body.keyboard-open .dictation-actions #btnPauseVoice{order:2}
+body.keyboard-open .dictation-actions #btnStopVoice{order:3}
+body.keyboard-open .dictation-actions #btnCancelVoice{order:4}
+body.keyboard-open .dictation-actions #btnInsertTranscript{order:5}
 body.keyboard-open .dictation-actions .review-panel{display:none}
 body.editing-transcript .dictation-sheet .status-inline{display:none}
-body.editing-transcript .dictation-main .transcript-box{min-height:48dvh}
-body.editing-transcript .dictation-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+body.editing-transcript .dictation-main .transcript-box{min-height:42dvh}
+body.editing-transcript .dictation-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;position:sticky;bottom:0;z-index:6;background:rgba(255,255,255,.96);padding:6px 0 0;border-top:1px solid #d7e1e6}
 body.editing-transcript .dictation-actions .btn{min-height:34px;font-size:.72rem;padding:4px 5px;border-radius:7px}
 body.editing-transcript .dictation-actions #btnInsertTranscript{grid-column:1/-1;min-height:38px;font-size:.8rem}
+body.editing-transcript .dictation-actions #btnStartVoice{order:1}
+body.editing-transcript .dictation-actions #btnPauseVoice{order:2}
+body.editing-transcript .dictation-actions #btnStopVoice{order:3}
+body.editing-transcript .dictation-actions #btnCancelVoice{order:4}
+body.editing-transcript .dictation-actions #btnInsertTranscript{order:5}
 body.editing-transcript .dictation-actions .review-panel{display:none}
 body.editing-transcript #btnConfirmTranscriptEdit{display:inline-flex}
 .modal-body .status-inline{font-size:.82rem;padding:8px 10px;border-radius:8px;border-left:4px solid var(--brand);background:#e9f4f9;font-weight:600}
@@ -205,19 +215,25 @@ body.editing-transcript #btnConfirmTranscriptEdit{display:inline-flex}
 .dictation-sheet .modal-header h2{font-size:1.18rem}
 .dictation-sheet .modal-body{padding:12px;gap:10px}
 .dictation-sheet .status-inline{font-size:.95rem}
-.dictation-workspace{display:flex;flex-direction:column;gap:10px}
-.dictation-main .transcript-box{min-height:42dvh;font-size:1.2rem;line-height:1.5;padding:14px}
-.dictation-actions{grid-template-columns:1fr 1fr;gap:8px}
+.dictation-workspace{display:flex;flex-direction:column;gap:8px;min-height:0;flex:1}
+.dictation-main{flex:1;min-height:0}
+.dictation-main .transcript-box{min-height:34dvh;font-size:1.2rem;line-height:1.5;padding:14px}
+.dictation-actions{grid-template-columns:1fr 1fr;gap:8px;position:sticky;bottom:0;z-index:5;background:rgba(255,255,255,.97);padding-top:6px;border-top:1px solid #d7e1e6}
 .dictation-actions .btn{min-height:52px;font-size:.95rem}
 .dictation-actions #btnInsertTranscript{grid-column:1/-1;min-height:58px}
 .dictation-actions .review-panel{grid-column:1/-1}
 .dictation-sheet .ai-box{min-height:68px;max-height:96px}
 .dictation-sheet .review-panel.is-prominent .ai-box{min-height:180px;max-height:none}
-body.editing-transcript .dictation-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+body.editing-transcript .dictation-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;position:sticky;bottom:0;z-index:6;background:rgba(255,255,255,.97);padding-top:6px;border-top:1px solid #d7e1e6}
 body.editing-transcript .dictation-actions .btn{min-height:34px;font-size:.72rem;padding:4px 5px}
 body.editing-transcript .dictation-actions #btnInsertTranscript{grid-column:1/-1;min-height:38px;font-size:.8rem}
+body.editing-transcript .dictation-actions #btnStartVoice{order:1}
+body.editing-transcript .dictation-actions #btnPauseVoice{order:2}
+body.editing-transcript .dictation-actions #btnStopVoice{order:3}
+body.editing-transcript .dictation-actions #btnCancelVoice{order:4}
+body.editing-transcript .dictation-actions #btnInsertTranscript{order:5}
 body.editing-transcript .dictation-actions .review-panel{display:none}
-body.editing-transcript .dictation-main .transcript-box{min-height:50dvh}
+body.editing-transcript .dictation-main .transcript-box{min-height:40dvh}
 }
 </style>
 </head>
