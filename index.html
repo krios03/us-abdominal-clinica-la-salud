@@ -676,10 +676,27 @@ function setupVoice(){
 function stopMediaStream(){
   if(app.mediaStream){app.mediaStream.getTracks().forEach(t=>t.stop());app.mediaStream=null}
 }
+function syncOpenAISettings(){
+  const whisperKey=(el.whisperApiKey?.value||app.settings.whisperApiKey||"").trim();
+  const reviewKey=(el.openaiKey?.value||app.settings.openaiKey||"").trim();
+  const sharedKey=reviewKey||whisperKey;
+  const whisperModel=(el.whisperModel?.value||app.settings.whisperModel||DEFAULT_SETTINGS.whisperModel).trim()||DEFAULT_SETTINGS.whisperModel;
+  const reviewModel=(el.openaiModel?.value||app.settings.openaiModel||DEFAULT_SETTINGS.openaiModel).trim()||DEFAULT_SETTINGS.openaiModel;
+  app.settings.whisperApiKey=whisperKey||reviewKey;
+  app.settings.openaiKey=reviewKey||whisperKey;
+  app.settings.whisperModel=whisperModel;
+  app.settings.openaiModel=reviewModel;
+  if(el.whisperApiKey&&!el.whisperApiKey.value&&sharedKey)el.whisperApiKey.value=sharedKey;
+  if(el.openaiKey&&!el.openaiKey.value&&sharedKey)el.openaiKey.value=sharedKey;
+  if(el.whisperModel)el.whisperModel.value=whisperModel;
+  if(el.openaiModel)el.openaiModel.value=reviewModel;
+  localStorage.setItem(SETTINGS_KEY,JSON.stringify(app.settings));
+  return {apiKey:sharedKey,whisperModel,reviewModel}
+}
 async function transcribeWithWhisper(blob){
-  const apiKey=(app.settings.whisperApiKey||"").trim();
+  const {apiKey,whisperModel}=syncOpenAISettings();
   if(!apiKey)throw new Error("Falta API Key de OpenAI para Whisper.");
-  const model=(app.settings.whisperModel||"whisper-1").trim()||"whisper-1";
+  const model=whisperModel||"whisper-1";
   const fileName=blob.type.includes("mp4")?"dictado.mp4":"dictado.webm";
   const form=new FormData();
   form.append("file",blob,fileName);
@@ -718,7 +735,7 @@ async function handleRecordingStop(){
 async function startVoice(){
   if(!app.activeField){setStatus("Primero seleccione una casilla.","warn");vibrate(15);return}
   if(app.isListening){setStatus("La grabación ya está activa.","warn");return}
-  if(!(app.settings.whisperApiKey||"").trim()){setStatus("Configure API Key de OpenAI en ⚙ para usar Whisper.","warn");openSettingsModal();return}
+  if(!syncOpenAISettings().apiKey){setStatus("Configure API Key de OpenAI en ⚙ para usar Whisper y revisión.","warn");openSettingsModal();return}
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
     const mimeType=getSupportedAudioMime();
@@ -808,12 +825,13 @@ function extractOpenAIText(data){
 }
 
 function syncOpenAIReviewSettings(){
-  const key=(el.openaiKey?.value||app.settings.openaiKey||"").trim();
-  const model=(el.openaiModel?.value||app.settings.openaiModel||DEFAULT_SETTINGS.openaiModel).trim()||DEFAULT_SETTINGS.openaiModel;
-  app.settings.openaiKey=key;app.settings.openaiModel=model;
-  if(el.openaiKey)el.openaiKey.value=key;if(el.openaiModel)el.openaiModel.value=model;
-  localStorage.setItem(SETTINGS_KEY,JSON.stringify(app.settings));
-  return {apiKey:key,model}
+  const settings=syncOpenAISettings();
+  return {apiKey:settings.apiKey,model:settings.reviewModel}
+}
+async function fetchOpenAIJson(url,apiKey,body){
+  const resp=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${apiKey}`},body:JSON.stringify(body)});
+  if(!resp.ok){const t=await resp.text();const err=new Error(t||`HTTP ${resp.status}`);err.status=resp.status;throw err}
+  return resp.json()
 }
 
 async function reviewWithOpenAI(promptText){
@@ -833,6 +851,30 @@ async function reviewWithOpenAI(promptText){
   const text=extractOpenAIText(data);
   if(!text)throw new Error("OpenAI no devolvió texto.");
   return text
+}
+
+async function reviewWithOpenAIChat(promptText,preferredModel){
+  const {apiKey}=syncOpenAIReviewSettings();if(!apiKey)throw new Error("Sin API Key");
+  const instructions="Eres un verificador clínico de reportes de ultrasonido abdominal. No diagnostiques fuera del texto aportado, no inventes medidas ni hallazgos, y mantén salida breve en español.";
+  let lastError=null;
+  for(const model of [preferredModel,"gpt-4o-mini"]){
+    if(!model)continue;
+    try{
+      const data=await fetchOpenAIJson("https://api.openai.com/v1/chat/completions",apiKey,{model,messages:[{role:"system",content:instructions},{role:"user",content:promptText}],temperature:0.2,max_tokens:900});
+      const text=data.choices?.[0]?.message?.content?.trim()||"";
+      if(text)return text;
+      throw new Error("OpenAI no devolvió texto.");
+    }catch(e){lastError=e}
+  }
+  throw lastError||new Error("OpenAI no respondió.")
+}
+async function reviewWithOpenAIRobust(promptText){
+  const {model}=syncOpenAIReviewSettings();
+  try{return await reviewWithOpenAI(promptText)}
+  catch(responsesError){
+    try{return await reviewWithOpenAIChat(promptText,model)}
+    catch(chatError){throw new Error(`${responsesError.message} | Fallback: ${chatError.message}`)}
+  }
 }
 
 function reviewLocally({scope,fieldId,value,data}){
@@ -869,7 +911,7 @@ async function runAiReview(scope){
   setReviewProminent(true);setStatus("Analizando con IA... revise el panel resaltado.","info");if(el.aiResult)el.aiResult.value="";
   try{
     const prompt=getReviewPrompt({scope,fieldId,value,data});
-    const result=syncOpenAIReviewSettings().apiKey?await reviewWithOpenAI(prompt):reviewLocally({scope,fieldId,value,data});
+    const result=syncOpenAIReviewSettings().apiKey?await reviewWithOpenAIRobust(prompt):reviewLocally({scope,fieldId,value,data});
     el.aiResult.value=result;setReviewProminent(true);setStatus("Revisión completada. Verifique el panel resaltado antes de aplicar.","ok");vibrate([30,40,30])
   }catch(e){setStatus("OpenAI no respondió. Revisión local.","warn");
     el.aiResult.value=reviewLocally({scope,fieldId,value,data})+`\n\nNOTA: OpenAI no disponible. Detalle: ${e.message}`;setReviewProminent(true);
@@ -1033,7 +1075,7 @@ function clearForm(){el.fields.forEach(f=>{f.value=""});el.aiResult.value="";el.
 function requestClearForm(){if(hasDraftData()&&!confirm("¿Crear un nuevo reporte y borrar el formulario actual?"))return;clearForm()}
 
 /* ── SETTINGS ── */
-function saveSettings(){app.settings.whisperApiKey=el.whisperApiKey.value.trim();app.settings.whisperModel=el.whisperModel.value.trim()||DEFAULT_SETTINGS.whisperModel;app.settings.openaiKey=el.openaiKey.value.trim();app.settings.openaiModel=el.openaiModel.value.trim()||DEFAULT_SETTINGS.openaiModel;app.settings.googleClientId=el.googleClientId.value.trim();app.settings.driveFolderId=el.driveFolderId.value.trim();localStorage.setItem(SETTINGS_KEY,JSON.stringify(app.settings));setStatus("Configuración guardada.","ok");vibrate([20,30,20])}
+function saveSettings(){syncOpenAISettings();app.settings.googleClientId=el.googleClientId.value.trim();app.settings.driveFolderId=el.driveFolderId.value.trim();localStorage.setItem(SETTINGS_KEY,JSON.stringify(app.settings));setStatus("Configuración guardada. La misma API key puede usarse para Whisper y revisión.","ok");vibrate([20,30,20])}
 function loadSettings(){const r=localStorage.getItem(SETTINGS_KEY);if(!r)app.settings={...DEFAULT_SETTINGS};else try{app.settings={...DEFAULT_SETTINGS,...JSON.parse(r)}}catch(e){app.settings={...DEFAULT_SETTINGS}}el.whisperApiKey.value=app.settings.whisperApiKey;el.whisperModel.value=app.settings.whisperModel;el.openaiKey.value=app.settings.openaiKey;el.openaiModel.value=app.settings.openaiModel;el.googleClientId.value=app.settings.googleClientId;el.driveFolderId.value=app.settings.driveFolderId;if(app.settings.logoLeft)el.logoLeft.src=app.settings.logoLeft;if(app.settings.logoRight)el.logoRight.src=app.settings.logoRight}
 function handleLogoUpload(inputEl,side){const file=inputEl.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{const r=String(reader.result||"");if(side==="left"){el.logoLeft.src=r;app.settings.logoLeft=r}else{el.logoRight.src=r;app.settings.logoRight=r}localStorage.setItem(SETTINGS_KEY,JSON.stringify(app.settings));setStatus("Logo actualizado.","ok");vibrate(15)};reader.readAsDataURL(file)}
 
