@@ -6,6 +6,7 @@
       ".firebaserc",
       ".git/**",
       ".github/**",
+      "functions/**",
       "node_modules/**",
       "*.log"
     ],

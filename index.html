@@ -771,25 +771,46 @@ function syncOpenAISettings(){
   localStorage.setItem(SETTINGS_KEY,JSON.stringify(app.settings));
   return {apiKey:sharedKey,whisperModel,reviewModel}
 }
-async function transcribeWithWhisper(blob){
-  const {apiKey,whisperModel}=syncOpenAISettings();
-  if(!apiKey)throw new Error("Falta API Key de OpenAI para Whisper.");
-  const model=whisperModel||"whisper-1";
+function blobToBase64Audio(blob){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{const result=String(reader.result||"");resolve(result.includes(",")?result.split(",")[1]:result)};
+    reader.onerror=()=>reject(new Error("No se pudo leer el audio grabado."));
+    reader.readAsDataURL(blob)
+  })
+}
+async function transcribeViaProxy(blob,model,prompt){
+  const audio=await blobToBase64Audio(blob);
+  const resp=await fetch("/api/transcribe",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({audio,mimeType:blob.type||"audio/webm",model,prompt})
+  });
+  if(resp.status===404)throw new Error("PROXY_NOT_AVAILABLE");
+  let data={};try{data=await resp.json()}catch(e){data={error:await resp.text().catch(()=>"")}}
+  if(!resp.ok)throw new Error(data.error||`HTTP ${resp.status}`);
+  return norm(data.text||"")
+}
+async function transcribeDirectToOpenAI(blob,apiKey,model,prompt){
   const fileName=blob.type.includes("mp4")?"dictado.mp4":"dictado.webm";
   const form=new FormData();
-  form.append("file",blob,fileName);
-  form.append("model",model);
-  form.append("language","es");
-  form.append("response_format","json");
-  form.append("prompt","Reporte de ultrasonido abdominal en español médico hondureño. Términos frecuentes: hígado, vesícula biliar, páncreas, riñones, bazo, vejiga, litiasis, ecogenicidad, parénquima, hidronefrosis.");
-  const resp=await fetch("https://api.openai.com/v1/audio/transcriptions",{
-    method:"POST",
-    headers:{Authorization:`Bearer ${apiKey}`},
-    body:form
-  });
+  form.append("file",blob,fileName);form.append("model",model);form.append("language","es");form.append("response_format","json");form.append("prompt",prompt);
+  let resp;
+  try{resp=await fetch("https://api.openai.com/v1/audio/transcriptions",{method:"POST",headers:{Authorization:`Bearer ${apiKey}`},body:form})}catch(e){
+    throw new Error("El navegador bloque? la conexi?n directa con OpenAI. Para usar Whisper en l?nea hay que activar Firebase Functions en plan Blaze.")
+  }
   if(!resp.ok){const t=await resp.text();throw new Error(t||`HTTP ${resp.status}`)}
-  const data=await resp.json();
-  return norm(data.text||"")
+  const data=await resp.json();return norm(data.text||"")
+}
+async function transcribeWithWhisper(blob){
+  const {apiKey,whisperModel}=syncOpenAISettings();
+  const model=whisperModel||"whisper-1";
+  const prompt="Reporte de ultrasonido abdominal en español médico hondureño. Términos frecuentes: hígado, vesícula biliar, páncreas, riñones, bazo, vejiga, litiasis, ecogenicidad, parénquima, hidronefrosis.";
+  try{return await transcribeViaProxy(blob,model,prompt)}catch(e){
+    if(e.message!=="PROXY_NOT_AVAILABLE")throw e;
+  }
+  if(!apiKey)throw new Error("Servidor Whisper no activo. Active Firebase Functions en plan Blaze o configure una API key para pruebas locales.");
+  return transcribeDirectToOpenAI(blob,apiKey,model,prompt)
 }
 async function handleRecordingStop(){
   const chunks=app.audioChunks.splice(0);
