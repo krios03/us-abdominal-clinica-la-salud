@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="app-build" content="20260610162404">
-<title>US Abdominal - Clínica La Salud</title>
+<title>US Mama - Clínica La Salud</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Atkinson+Hyperlegible+Next:wght@400;500;700&display=swap" rel="stylesheet">
@@ -244,14 +244,14 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
 <div class="app-shell">
   <header class="app-bar">
     <div class="app-title">
-      <h1>US Abdominal ? Clínica La Salud</h1>
+      <h1>US Mama ? Clínica La Salud</h1>
       <div class="app-meta">
         <span class="autosave-status" id="autosaveStatus">Protección activa: guardado automático local</span>
         <span class="progress-status" id="reportProgress">0/13 campos</span>
       </div>
     </div>
     <div class="app-bar-actions">
-      <label class="exam-switch"><span>Examen</span><select id="examSelector"><option value="index.html" selected>Abdominal</option><option value="obstetrico.html">Obstétrico</option><option value="mama.html">Mama</option><option value="pelvico.html">Pélvico</option><option value="prostatico.html">Prostático</option><option value="partes-blandas.html">Partes blandas</option></select></label>
+      <label class="exam-switch"><span>Examen</span><select id="examSelector"><option value="index.html">Abdominal</option><option value="obstetrico.html">Obstétrico</option><option value="mama.html" selected>Mama</option><option value="pelvico.html">Pélvico</option><option value="prostatico.html">Prostático</option><option value="partes-blandas.html">Partes blandas</option></select></label>
       <button class="btn small ghost" id="btnClearForm">Nuevo</button>
       <button class="btn small" id="btnOpenHistory">Historial</button>
       <button class="btn small primary" id="btnExportPdf">PDF</button>
@@ -274,9 +274,10 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
           <div class="logo-box"><img id="logoRight" src="assets/icono-ultrasonido.png" alt="Icono de ultrasonido"></div>
         </header>
 
-        <h3 class="section-title">Reporte de Ultrasonido Abdominal</h3>
+        <h3 class="section-title">Reporte de Ultrasonido Mama</h3>
         <p class="form-hint">Toque una casilla para escribir. Use “Dictar casilla” para voz o revisión.</p>
 
+        
         <div class="field-line">
           <label>Nombre:</label>
           <input type="text" data-field="nombre" placeholder="Nombre del paciente" autocomplete="off">
@@ -284,58 +285,21 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
         <div class="field-line">
           <label>Edad:</label>
           <input type="text" data-field="edad" placeholder="Edad" autocomplete="off" style="max-width:70px">
-          <label style="min-width:42px">Sexo:</label>
-          <input type="text" data-field="sexo" placeholder="M/F" autocomplete="off" style="max-width:70px">
           <label style="min-width:45px">Fecha:</label>
           <input type="text" data-field="fecha" placeholder="DD/MM/AAAA" autocomplete="off" style="max-width:145px">
           <button class="btn-today" id="btnFechaHoy">Hoy</button>
         </div>
 
-        <div class="field-block">
-          <label class="subsection">Indicación</label>
-          <textarea data-field="indicacion" rows="1" placeholder="Motivo del estudio..." autocomplete="off"></textarea>
-        </div>
-
         <h4 class="subsection">Hallazgos</h4>
 
         <div class="field-block">
-          <label style="font-weight:700;font-size:14px">Hígado</label>
-          <textarea data-field="higado" rows="2" placeholder="Forma, tamaño, ecogenicidad, lesiones..." autocomplete="off"></textarea>
+          <label style="font-weight:700;font-size:14px">Mama derecha</label>
+          <textarea data-field="mama_derecha" rows="5" placeholder="Hallazgos de mama derecha..." autocomplete="off"></textarea>
         </div>
 
         <div class="field-block">
-          <label style="font-weight:700;font-size:14px">Vesícula Biliar</label>
-          <textarea data-field="vesicula" rows="2" placeholder="Pared, contenido, litiasis..." autocomplete="off"></textarea>
-        </div>
-
-        <div class="field-block">
-          <label style="font-weight:700;font-size:14px">Páncreas</label>
-          <textarea data-field="pancreas" rows="2" placeholder="Cabeza, cuerpo, cola, lesiones..." autocomplete="off"></textarea>
-        </div>
-
-        <div class="field-block">
-          <label style="font-weight:700;font-size:14px">Riñones</label>
-          <textarea data-field="rinones" rows="3" placeholder="Tamaño, parénquima, litiasis, quistes..." autocomplete="off"></textarea>
-        </div>
-
-        <div class="field-block">
-          <label style="font-weight:700;font-size:14px">Bazo</label>
-          <textarea data-field="bazo" rows="1" placeholder="Tamaño, homogeneidad..." autocomplete="off"></textarea>
-        </div>
-
-        <div class="field-block">
-          <label style="font-weight:700;font-size:14px">Vejiga</label>
-          <textarea data-field="vejiga" rows="1" placeholder="Pared, contenido, repleción..." autocomplete="off"></textarea>
-        </div>
-
-        <div class="field-block">
-          <label style="font-weight:700;font-size:14px">Dx</label>
-          <textarea data-field="dx" rows="2" placeholder="Diagnóstico(s)..." autocomplete="off"></textarea>
-        </div>
-
-        <div class="field-block">
-          <label style="font-weight:700;font-size:14px">Conclusión</label>
-          <textarea data-field="conclusion" rows="2" placeholder="Conclusión y recomendaciones..." autocomplete="off"></textarea>
+          <label style="font-weight:700;font-size:14px">Mama izquierda</label>
+          <textarea data-field="mama_izquierda" rows="5" placeholder="Hallazgos de mama izquierda..." autocomplete="off"></textarea>
         </div>
       </article>
     </main>
@@ -479,26 +443,19 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
 <script>
 /* ── CONSTANTS ── */
 const FIELD_LABELS = {
-  nombre:"Nombre", fecha:"Fecha", edad:"Edad", sexo:"Sexo", indicacion:"Indicación",
-  higado:"Hígado", vesicula:"Vesícula Biliar", pancreas:"Páncreas",
-  rinones:"Riñones", bazo:"Bazo", vejiga:"Vejiga",
-  dx:"Dx", conclusion:"Conclusión"
+  nombre:"Nombre",
+  edad:"Edad",
+  fecha:"Fecha",
+  mama_derecha:"Mama derecha",
+  mama_izquierda:"Mama izquierda"
 };
 
 const FIELD_EXPECTATIONS = {
   nombre:"Nombre completo del paciente.",
-  fecha:"Fecha del estudio en formato DD/MM/AAAA.",
   edad:"Edad del paciente en años.",
-  sexo:"Sexo del paciente: femenino, masculino u otra descripción indicada por la clínica.",
-  indicacion:"Motivo clínico del estudio: dolor, control, sospecha, etc.",
-  higado:"Descripción del hígado: tamaño (altura hepática en cm), forma, contornos, ecogenicidad, lesiones focales, vías suprahepáticas.",
-  vesicula:"Descripción de la vesícula biliar: pared (mm), contenido, litiasis (tamaño, sombra), pólipos, barro biliar.",
-  pancreas:"Descripción del páncreas: cabeza, cuerpo, cola, tamaño, ecogenicidad, lesiones ocupativas, conducto de Wirsung.",
-  rinones:"Descripción de ambos riñones: tamaño (longitud x AP en cm), parénquima, relación corticomedular, litiasis, quistes, hidronefrosis.",
-  bazo:"Descripción del bazo: tamaño (longitud en cm), homogeneidad, lesiones, esplenomegalia.",
-  vejiga:"Descripción de la vejiga: pared, contenido anecogénico, repleción, lesiones, residuo post-miccional.",
-  dx:"Diagnóstico(s) ultrasonográfico(s). Usar terminología médica estándar.",
-  conclusion:"Resumen de hallazgos relevantes y recomendaciones clínicas."
+  fecha:"Fecha del estudio en formato DD/MM/AAAA.",
+  mama_derecha:"Descripción de mama derecha: tejido, nódulos, quistes, conductos, lesiones, axila si aplica.",
+  mama_izquierda:"Descripción de mama izquierda: tejido, nódulos, quistes, conductos, lesiones, axila si aplica."
 };
 
 const DEFAULT_SETTINGS = {
@@ -508,7 +465,7 @@ const DEFAULT_SETTINGS = {
   logoLeft:"", logoRight:""
 };
 
-const DRAFT_KEY = "abdDraft", HISTORY_KEY = "abdHistory", SETTINGS_KEY = "abdSettings";
+const DRAFT_KEY = "mamaDraft", HISTORY_KEY = "mamaHistory", SETTINGS_KEY = "mamaSettings";
 const HISTORY_MAX = 120;
 const WHATSAPP_DIRECT_PHONE = "50432478786";
 
@@ -765,7 +722,7 @@ async function transcribeWithWhisper(blob){
   form.append("model",model);
   form.append("language","es");
   form.append("response_format","json");
-  form.append("prompt","Reporte de ultrasonido abdominal en español médico hondureño. Términos frecuentes: hígado, vesícula biliar, páncreas, riñones, bazo, vejiga, litiasis, ecogenicidad, parénquima, hidronefrosis.");
+  form.append("prompt","Reporte de ultrasonido de mama en español médico hondureño. Términos frecuentes: mama derecha, mama izquierda, nódulo, quiste, tejido fibroglandular, conductos, axila, BIRADS.");
   const resp=await fetch("https://api.openai.com/v1/audio/transcriptions",{
     method:"POST",
     headers:{Authorization:`Bearer ${apiKey}`},
@@ -836,8 +793,8 @@ function cancelVoice(){
 function getReviewPrompt({scope,fieldId,value,data}){
   const ctx=JSON.stringify(data,null,2);
   if(scope==="field"){
-    const exp=FIELD_EXPECTATIONS[fieldId]||"Campo de reporte de ultrasonido abdominal.";
-    return `Eres un asistente médico especializado en reportes de ultrasonido abdominal. Revisa SOLO la casilla activa.
+    const exp=FIELD_EXPECTATIONS[fieldId]||"Campo de reporte de ultrasonido de mama.";
+    return `Eres un asistente médico especializado en reportes de ultrasonido de mama. Revisa SOLO la casilla activa.
 
 Casilla: ${FIELD_LABELS[fieldId]}
 Qué debe contener: ${exp}
@@ -860,7 +817,7 @@ COHERENCIA:
 SUGERENCIAS:
 - <sugerencia>`
   }
-  return `Eres un revisor clínico de reportes de ultrasonido abdominal. Revisa el reporte completo para claridad, coherencia y terminología médica.
+  return `Eres un revisor clínico de reportes de ultrasonido de mama. Revisa el reporte completo para claridad, coherencia y terminología médica.
 
 Datos: ${ctx}
 
@@ -903,7 +860,7 @@ async function reviewWithOpenAI(promptText){
     headers:{"Content-Type":"application/json",Authorization:`Bearer ${apiKey}`},
     body:JSON.stringify({
       model,
-      instructions:"Eres un verificador clínico de reportes de ultrasonido abdominal. No diagnostiques fuera del texto aportado, no inventes medidas ni hallazgos, y mantén salida breve en español.",
+      instructions:"Eres un verificador clínico de reportes de ultrasonido de mama. No diagnostiques fuera del texto aportado, no inventes medidas ni hallazgos, y mantén salida breve en español.",
       input:promptText,
       max_output_tokens:900
     })
@@ -917,7 +874,7 @@ async function reviewWithOpenAI(promptText){
 
 async function reviewWithOpenAIChat(promptText,preferredModel){
   const {apiKey}=syncOpenAIReviewSettings();if(!apiKey)throw new Error("Sin API Key");
-  const instructions="Eres un verificador clínico de reportes de ultrasonido abdominal. No diagnostiques fuera del texto aportado, no inventes medidas ni hallazgos, y mantén salida breve en español.";
+  const instructions="Eres un verificador clínico de reportes de ultrasonido de mama. No diagnostiques fuera del texto aportado, no inventes medidas ni hallazgos, y mantén salida breve en español.";
   let lastError=null;
   for(const model of [preferredModel,"gpt-4o-mini"]){
     if(!model)continue;
@@ -996,7 +953,7 @@ function applyAiTextToField(){
 /* ── PDF ── */
 function buildFileName(){
   const d=getFormData();const n=(d.nombre||"Paciente").replace(/[^a-zA-Z0-9_-]+/g,"_");
-  const now=new Date();return `Reporte_Abdominal_${n}_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}.pdf`
+  const now=new Date();return `Reporte_Mama_${n}_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}.pdf`
 }
 function fitLine(pdf,text,maxW){const s=String(text||"").trim();if(!s)return"";let o=s;while(pdf.getTextWidth(o)>maxW&&o.length>1)o=`${o.slice(0,-2)}…`;return o}
 function splitMulti(pdf,text,maxW){const s=String(text||"").trim();return s?pdf.splitTextToSize(s,maxW):[]}
@@ -1012,9 +969,7 @@ async function generatePdfBlob(){
   const pw=612,ph=792,L=24,R=pw-24,B=ph-24,contentW=R-L;let y=24;
   const lL=optimizeLogo(el.logoLeft,.42),lR=optimizeLogo(el.logoRight,.38);
   const sections=[
-    ["Indicación",data.indicacion||""],["Hígado",data.higado||""],["Vesícula Biliar",data.vesicula||""],
-    ["Páncreas",data.pancreas||""],["Riñones",data.rinones||""],["Bazo",data.bazo||""],
-    ["Vejiga",data.vejiga||""],["Dx",data.dx||""],["Conclusión",data.conclusion||""]
+    ["Mama derecha",data.mama_derecha||""],["Mama izquierda",data.mama_izquierda||""]
   ];
   const headerHeight=58+12+20+20,footerHeight=14,sectionGap=5,titleHeight=14,boxPadY=14,minBox=24;
   const available=B-24-headerHeight-footerHeight;
@@ -1042,7 +997,7 @@ async function generatePdfBlob(){
   pdf.text("Médico Ultrasonografista: Dra. Mariana López",pw/2,y+26,{align:"center"});
   pdf.text("B. El Centro, Siguatepeque, Comayagua · Tel: 9645-1203",pw/2,y+39,{align:"center"});
   pdf.setDrawColor(184,211,222);pdf.setLineWidth(.8);pdf.line(L,y+51,R,y+51);
-  y+=58;pdf.setFont("times","bold");pdf.setFontSize(15);pdf.text("Reporte de Ultrasonido Abdominal",pw/2,y,{align:"center"});y+=12;
+  y+=58;pdf.setFont("times","bold");pdf.setFontSize(15);pdf.text("Reporte de Ultrasonido Mama",pw/2,y,{align:"center"});y+=12;
   const lineField=(label,value,x,w)=>{
     pdf.setFillColor(247,251,253);pdf.setDrawColor(203,220,227);pdf.roundedRect(x,y,w,16,2,2,"FD");
     pdf.setTextColor(18,72,91);pdf.setFont("times","bold");pdf.setFontSize(9.5);pdf.text(`${label}:`,x+5,y+11);
@@ -1090,7 +1045,7 @@ function downloadCurrentPdf(){
 }
 function getPdfShareText(){
   const d=getFormData();const patient=d.nombre?` de ${d.nombre}`:"";
-  return `Reporte de Ultrasonido Abdominal${patient}. Archivo: ${app.pdfFileName||buildFileName()}`;
+  return `Reporte de Ultrasonido Mama${patient}. Archivo: ${app.pdfFileName||buildFileName()}`;
 }
 async function shareCurrentPdfFile(){
   if(!app.pdfBlob){setStatus("Primero genere un PDF.","warn");return}
@@ -1099,7 +1054,7 @@ async function shareCurrentPdfFile(){
     setStatus("Este navegador no permite compartir el archivo directo. Use Descargar o WhatsApp directo.","warn");return
   }
   try{
-    await navigator.share({title:"Reporte de Ultrasonido Abdominal",text:getPdfShareText(),files:[file]});
+    await navigator.share({title:"Reporte de Ultrasonido Mama",text:getPdfShareText(),files:[file]});
     addToHistory("local",{fileName:app.pdfFileName||buildFileName()});setStatus("PDF compartido.","ok");vibrate([30,50,30])
   }catch(e){if(e.name!=="AbortError")setStatus(`No se pudo compartir: ${e.message}`,"danger")}
 }

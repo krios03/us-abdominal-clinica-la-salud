@@ -244,19 +244,19 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
 <div class="app-shell">
   <header class="app-bar">
     <div class="app-title">
-      <h1>US Obstétrico — Clínica La Salud</h1>
+      <h1>US Obstétrico ? Clínica La Salud</h1>
       <div class="app-meta">
         <span class="autosave-status" id="autosaveStatus">Protección activa: guardado automático local</span>
         <span class="progress-status" id="reportProgress">0/15 campos</span>
       </div>
     </div>
     <div class="app-bar-actions">
+      <label class="exam-switch"><span>Examen</span><select id="examSelector"><option value="index.html">Abdominal</option><option value="obstetrico.html" selected>Obstétrico</option><option value="mama.html">Mama</option><option value="pelvico.html">Pélvico</option><option value="prostatico.html">Prostático</option><option value="partes-blandas.html">Partes blandas</option></select></label>
       <button class="btn small ghost" id="btnClearForm">Nuevo</button>
       <button class="btn small" id="btnOpenHistory">Historial</button>
-      <a class="btn small primary" href="index.html">Abdominal</a>
       <button class="btn small primary" id="btnExportPdf">PDF</button>
       <button class="btn small success" id="btnSaveDrive">Drive</button>
-      <button class="btn small ghost" id="btnOpenSettings" aria-label="Configuración">⚙</button>
+      <button class="btn small ghost" id="btnOpenSettings" aria-label="Configuración">?</button>
     </div>
   </header>
 
@@ -572,7 +572,7 @@ function cacheEls(){
   el.btnOpenSettings=document.getElementById("btnOpenSettings"); el.btnCloseSettings=document.getElementById("btnCloseSettings");
   el.autosaveStatus=document.getElementById("autosaveStatus");
   el.reportProgress=document.getElementById("reportProgress"); el.summaryPatient=document.getElementById("summaryPatient");
-  el.summaryDate=document.getElementById("summaryDate"); el.summaryProgress=document.getElementById("summaryProgress");
+  el.summaryDate=document.getElementById("summaryDate"); el.summaryProgress=document.getElementById("summaryProgress"); el.examSelector=document.getElementById("examSelector");
 }
 
 /* ── STATUS ── */
@@ -1040,6 +1040,7 @@ function handleLogoUpload(inputEl,side){const file=inputEl.files?.[0];if(!file)r
 
 /* ── EVENTS ── */
 function attachEvents(){
+  if(el.examSelector)el.examSelector.addEventListener("change",()=>{const target=el.examSelector.value;if(target)window.location.href=target});
   el.fields.forEach(f=>{f.addEventListener("focus",()=>setActiveField(f));f.addEventListener("click",()=>setActiveField(f));f.addEventListener("dblclick",()=>{setActiveField(f);openModal()});f.addEventListener("input",()=>saveDraft())});
   if(el.transcriptEditor)el.transcriptEditor.addEventListener("input",()=>{saveDraft();if(el.transcriptEditor.selectionStart>=el.transcriptEditor.value.length-1)el.transcriptEditor.scrollTop=el.transcriptEditor.scrollHeight});
   if(el.transcriptEditor)el.transcriptEditor.addEventListener("focus",()=>{document.body.classList.add("editing-transcript");setTimeout(updateKeyboardVH,80)});
