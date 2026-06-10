@@ -69,6 +69,16 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 body.keyboard-open .modal-backdrop{align-items:flex-start;padding-bottom:8px}
 body.keyboard-open .modal-sheet{max-height:calc(var(--visual-vh, 100dvh) - 12px);transform:translateY(0)}
 body.keyboard-open .modal-body{padding-bottom:18px}
+body.keyboard-open .dictation-sheet .modal-header{padding:8px 12px}
+body.keyboard-open .dictation-sheet .modal-header h2{font-size:1rem}
+body.keyboard-open .dictation-sheet .status-inline{display:none}
+body.keyboard-open .dictation-workspace{display:flex;flex-direction:column;gap:6px}
+body.keyboard-open .dictation-main{flex:1;min-height:0}
+body.keyboard-open .dictation-label{font-size:.86rem}
+body.keyboard-open .dictation-main .transcript-box{min-height:calc(var(--visual-vh, 100dvh) - 118px);font-size:1.22rem;line-height:1.55}
+body.keyboard-open .dictation-actions{display:none}
+body.editing-transcript .dictation-sheet .status-inline{display:none}
+body.editing-transcript .dictation-main .transcript-box{min-height:54dvh}
 .modal-body .status-inline{font-size:.82rem;padding:8px 10px;border-radius:8px;border-left:4px solid var(--brand);background:#e9f4f9;font-weight:600}
 .modal-body textarea{width:100%;border:1px solid #bacad4;border-radius:10px;padding:10px;font-size:1rem;font-family:"Atkinson Hyperlegible Next",sans-serif;resize:vertical}
 .transcript-box{min-height:80px}
@@ -192,6 +202,8 @@ body.keyboard-open .modal-body{padding-bottom:18px}
 .dictation-actions .review-panel{grid-column:1/-1}
 .dictation-sheet .ai-box{min-height:68px;max-height:96px}
 .dictation-sheet .review-panel.is-prominent .ai-box{min-height:180px;max-height:none}
+body.editing-transcript .dictation-actions{display:none}
+body.editing-transcript .dictation-main .transcript-box{min-height:62dvh}
 }
 </style>
 </head>
@@ -610,7 +622,7 @@ function openModal(){updateKeyboardVH();el.modalBackdrop.classList.add("open");d
   if(!app.isListening){app.transcriptBase="";app.transcriptBuffer="";syncTranscriptFromActiveField(true)}setReviewProminent(false);updateModalTitle();vibrate(8)}
 function closeModal(){
   if(app.isListening)cancelVoice();
-  setReviewProminent(false);setRecordingUI(false);el.modalBackdrop.classList.remove("open");document.body.style.overflow="";document.body.classList.remove("keyboard-open");vibrate(8)
+  setReviewProminent(false);setRecordingUI(false);el.modalBackdrop.classList.remove("open");document.body.style.overflow="";document.body.classList.remove("keyboard-open","editing-transcript");vibrate(8)
 }
 function openSettingsModal(){updateKeyboardVH();el.settingsBackdrop.classList.add("open");document.body.style.overflow="hidden";vibrate(8)}
 function closeSettingsModal(){el.settingsBackdrop.classList.remove("open");document.body.style.overflow="";document.body.classList.remove("keyboard-open");vibrate(8)}
@@ -1088,6 +1100,8 @@ function handleLogoUpload(inputEl,side){const file=inputEl.files?.[0];if(!file)r
 function attachEvents(){
   el.fields.forEach(f=>{f.addEventListener("focus",()=>setActiveField(f));f.addEventListener("click",()=>setActiveField(f));f.addEventListener("dblclick",()=>{setActiveField(f);openModal()});f.addEventListener("input",()=>saveDraft())});
   if(el.transcriptEditor)el.transcriptEditor.addEventListener("input",saveDraft);
+  if(el.transcriptEditor)el.transcriptEditor.addEventListener("focus",()=>{document.body.classList.add("editing-transcript");setTimeout(updateKeyboardVH,80)});
+  if(el.transcriptEditor)el.transcriptEditor.addEventListener("blur",()=>{document.body.classList.remove("editing-transcript");setTimeout(updateKeyboardVH,80)});
   if(el.aiResult)el.aiResult.addEventListener("input",()=>{setReviewProminent(true);saveDraft()});
   el.btnStartVoice.addEventListener("click",startVoice);el.btnPauseVoice.addEventListener("click",pauseVoice);
   el.btnStopVoice.addEventListener("click",finalizeVoice);el.btnInsertTranscript.addEventListener("click",insertTranscriptToActiveField);
