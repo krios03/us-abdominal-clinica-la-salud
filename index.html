@@ -106,6 +106,12 @@ body.keyboard-open .modal-body{padding-bottom:18px}
 .history-preview{font-size:.82rem;color:#23323e;background:#f3f8fb;border:1px dashed #c7d8e1;border-radius:8px;padding:8px;margin-bottom:8px;max-height:72px;overflow:hidden}
 .history-actions{display:flex;gap:6px;flex-wrap:wrap}
 .history-empty{border:1px dashed #c4d1d9;border-radius:10px;padding:12px;text-align:center;color:#546776;font-size:.88rem;background:#f8fbfd}
+.share-card{display:flex;flex-direction:column;gap:12px}
+.share-ready{border-left:5px solid #20603d;background:#eefaf3;border-radius:12px;padding:12px 14px;color:#123;font-weight:700}
+.share-file-name{font-size:.9rem;font-weight:800;word-break:break-word}
+.share-note{font-size:.82rem;line-height:1.35;color:#52616d;margin:0}
+.share-actions{display:grid;grid-template-columns:1fr;gap:10px}
+.share-actions .btn{width:100%;min-height:54px;font-size:1rem}
 .settings-group{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
 .settings-group h4{margin:0 0 2px;font-size:.9rem;color:var(--brand)}
 .settings-group label{font-size:.8rem;font-weight:600;color:#37414f;display:flex;flex-direction:column;gap:2px}
@@ -391,6 +397,30 @@ body.keyboard-open .modal-body{padding-bottom:18px}
     </div>
   </div>
 
+  <!-- PDF Share Modal -->
+  <div class="modal-backdrop" id="pdfShareBackdrop">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h2>PDF listo</h2>
+        <button class="btn close" id="btnClosePdfShare">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="share-card">
+          <div class="share-ready">
+            Reporte generado correctamente.
+            <div class="share-file-name" id="pdfShareFileName">Reporte.pdf</div>
+          </div>
+          <div class="share-actions">
+            <button class="btn success" id="btnSharePdfFile">Compartir PDF por WhatsApp</button>
+            <button class="btn primary" id="btnSharePdfDirect">Enviar a +504 3247-8786</button>
+            <button class="btn" id="btnDownloadPdfReady">Descargar PDF</button>
+          </div>
+          <p class="share-note" id="pdfShareNote">En teléfonos compatibles se comparte el archivo PDF directamente. Si el navegador no permite adjuntar archivos, se abrirá WhatsApp y podrá adjuntar el PDF descargado.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Hidden PDF render target -->
   <div class="pdf-only" id="pdfPage"></div>
 </div>
@@ -428,9 +458,10 @@ const DEFAULT_SETTINGS = {
 
 const DRAFT_KEY = "abdDraft", HISTORY_KEY = "abdHistory", SETTINGS_KEY = "abdSettings";
 const HISTORY_MAX = 120;
+const WHATSAPP_DIRECT_PHONE = "50432478786";
 
 const app = {activeField:null,mediaRecorder:null,mediaStream:null,audioChunks:[],isListening:false,isPaused:false,recordingCanceled:false,voiceSupported:true,
-  transcriptBase:"",transcriptBuffer:"",guardEnabled:true,settings:{...DEFAULT_SETTINGS},googleTokenClient:null};
+  transcriptBase:"",transcriptBuffer:"",guardEnabled:true,settings:{...DEFAULT_SETTINGS},googleTokenClient:null,pdfBlob:null,pdfFileName:"",pdfUrl:""};
 const el = {};
 
 /* ── UTILS ── */
@@ -473,6 +504,10 @@ function cacheEls(){
   el.historyBackdrop=document.getElementById("historyBackdrop"); el.historySearch=document.getElementById("historySearch");
   el.historyList=document.getElementById("historyList");
   el.btnSaveSnapshot=document.getElementById("btnSaveSnapshot");
+  el.pdfShareBackdrop=document.getElementById("pdfShareBackdrop"); el.pdfShareFileName=document.getElementById("pdfShareFileName");
+  el.pdfShareNote=document.getElementById("pdfShareNote"); el.btnClosePdfShare=document.getElementById("btnClosePdfShare");
+  el.btnSharePdfFile=document.getElementById("btnSharePdfFile"); el.btnSharePdfDirect=document.getElementById("btnSharePdfDirect");
+  el.btnDownloadPdfReady=document.getElementById("btnDownloadPdfReady");
   el.btnOpenSettings=document.getElementById("btnOpenSettings"); el.btnCloseSettings=document.getElementById("btnCloseSettings");
   el.autosaveStatus=document.getElementById("autosaveStatus");
   el.reportProgress=document.getElementById("reportProgress"); el.summaryPatient=document.getElementById("summaryPatient");
@@ -904,12 +939,53 @@ async function generatePdfBlob(){
   pdf.setFont("times","normal");pdf.setFontSize(8);pdf.setTextColor(90,90,90);pdf.text("Página 1 de 1",R,ph-14,{align:"right"});
   return pdf.output("blob")
 }
+function setCurrentPdf(blob,fileName){
+  if(app.pdfUrl)URL.revokeObjectURL(app.pdfUrl);
+  app.pdfBlob=blob;app.pdfFileName=fileName;app.pdfUrl=URL.createObjectURL(blob);
+  if(el.pdfShareFileName)el.pdfShareFileName.textContent=fileName;
+  const canShareFile=!!(navigator.canShare&&window.File&&navigator.canShare({files:[new File([blob],fileName,{type:"application/pdf"})]}));
+  if(el.btnSharePdfFile)el.btnSharePdfFile.disabled=!canShareFile;
+  if(el.pdfShareNote)el.pdfShareNote.textContent=canShareFile
+    ?"Puede compartir el archivo PDF directamente con WhatsApp u otra aplicación instalada."
+    :"Este navegador no permite adjuntar el PDF automáticamente. Descargue el archivo y se abrirá WhatsApp para enviarlo manualmente.";
+}
+function openPdfShareModal(){
+  if(!app.pdfBlob){setStatus("Primero genere un PDF.","warn");return}
+  el.pdfShareBackdrop.classList.add("open");document.body.style.overflow="hidden";vibrate(12)
+}
+function closePdfShareModal(){el.pdfShareBackdrop.classList.remove("open");document.body.style.overflow=""}
+function downloadCurrentPdf(){
+  if(!app.pdfBlob||!app.pdfUrl){setStatus("Primero genere un PDF.","warn");return}
+  const a=document.createElement("a");a.href=app.pdfUrl;a.download=app.pdfFileName||buildFileName();a.click();
+  addToHistory("local",{fileName:app.pdfFileName||buildFileName()});setStatus("PDF descargado y agregado al historial.","ok");vibrate([40,60,40])
+}
+function getPdfShareText(){
+  const d=getFormData();const patient=d.nombre?` de ${d.nombre}`:"";
+  return `Reporte de Ultrasonido Abdominal${patient}. Archivo: ${app.pdfFileName||buildFileName()}`;
+}
+async function shareCurrentPdfFile(){
+  if(!app.pdfBlob){setStatus("Primero genere un PDF.","warn");return}
+  const file=new File([app.pdfBlob],app.pdfFileName||buildFileName(),{type:"application/pdf"});
+  if(!(navigator.canShare&&navigator.canShare({files:[file]}))){
+    setStatus("Este navegador no permite compartir el archivo directo. Use Descargar o WhatsApp directo.","warn");return
+  }
+  try{
+    await navigator.share({title:"Reporte de Ultrasonido Abdominal",text:getPdfShareText(),files:[file]});
+    addToHistory("local",{fileName:app.pdfFileName||buildFileName()});setStatus("PDF compartido.","ok");vibrate([30,50,30])
+  }catch(e){if(e.name!=="AbortError")setStatus(`No se pudo compartir: ${e.message}`,"danger")}
+}
+function openWhatsAppDirect(){
+  if(!app.pdfBlob){setStatus("Primero genere un PDF.","warn");return}
+  const url=`https://wa.me/${WHATSAPP_DIRECT_PHONE}?text=${encodeURIComponent(getPdfShareText()+"\n\nAdjunto el PDF del reporte.")}`;
+  window.open(url,"_blank","noopener");
+  setStatus("WhatsApp abierto. Si no se adjunta solo, descargue el PDF y adjúntelo en el chat.","info");vibrate(10)
+}
 async function exportPdfToDownload(){
   const d=getFormData();const fc=Object.values(d).filter(v=>v.trim()).length;
   if(fc<2){setStatus("Complete al menos Nombre y algún hallazgo.","warn");vibrate([10,50,10]);return}
-  try{setStatus("Generando PDF...","info");const fileName=buildFileName();const blob=await generatePdfBlob();const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");a.href=url;a.download=fileName;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
-    addToHistory("local",{fileName});setStatus("PDF exportado y agregado al historial.","ok");vibrate([40,60,40])}catch(e){setStatus(`Error: ${e.message}`,"danger")}
+  try{setStatus("Generando PDF...","info");const fileName=buildFileName();const blob=await generatePdfBlob();
+    setCurrentPdf(blob,fileName);addToHistory("local",{fileName});setStatus("PDF generado. Elija compartir o descargar.","ok");openPdfShareModal()
+  }catch(e){setStatus(`Error: ${e.message}`,"danger")}
 }
 
 /* ── GOOGLE DRIVE ── */
@@ -962,13 +1038,18 @@ function attachEvents(){
   if(el.btnOpenSettings)el.btnOpenSettings.addEventListener("click",openSettingsModal);
   if(el.btnCloseSettings)el.btnCloseSettings.addEventListener("click",closeSettingsModal);
   if(el.settingsBackdrop)el.settingsBackdrop.addEventListener("click",e=>{if(e.target===el.settingsBackdrop)closeSettingsModal()});
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(el.modalBackdrop.classList.contains("open"))closeModal();if(el.settingsBackdrop.classList.contains("open"))closeSettingsModal();if(el.historyBackdrop?.classList.contains("open"))closeHistoryModal()}});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(el.modalBackdrop.classList.contains("open"))closeModal();if(el.settingsBackdrop.classList.contains("open"))closeSettingsModal();if(el.historyBackdrop?.classList.contains("open"))closeHistoryModal();if(el.pdfShareBackdrop?.classList.contains("open"))closePdfShareModal()}});
   if(el.btnOpenHistory)el.btnOpenHistory.addEventListener("click",openHistoryModal);
   if(el.btnCloseHistory)el.btnCloseHistory.addEventListener("click",closeHistoryModal);
   if(el.historyBackdrop)el.historyBackdrop.addEventListener("click",e=>{if(e.target===el.historyBackdrop)closeHistoryModal()});
   if(el.historySearch)el.historySearch.addEventListener("input",()=>renderHistory(el.historySearch.value||""));
   if(el.btnSaveSnapshot)el.btnSaveSnapshot.addEventListener("click",saveCurrentSnapshot);
   if(el.btnClearHistory)el.btnClearHistory.addEventListener("click",()=>{if(!confirm("¿Borrar todo el historial?"))return;saveHistory([]);renderHistory("");setStatus("Historial borrado.","ok")});
+  if(el.btnClosePdfShare)el.btnClosePdfShare.addEventListener("click",closePdfShareModal);
+  if(el.pdfShareBackdrop)el.pdfShareBackdrop.addEventListener("click",e=>{if(e.target===el.pdfShareBackdrop)closePdfShareModal()});
+  if(el.btnSharePdfFile)el.btnSharePdfFile.addEventListener("click",shareCurrentPdfFile);
+  if(el.btnSharePdfDirect)el.btnSharePdfDirect.addEventListener("click",openWhatsAppDirect);
+  if(el.btnDownloadPdfReady)el.btnDownloadPdfReady.addEventListener("click",downloadCurrentPdf);
   if(el.historyList)el.historyList.addEventListener("click",async ev=>{const t=ev.target.closest("button[data-ha]");if(!t)return;const a=t.getAttribute("data-ha"),id=t.getAttribute("data-hid");if(!id)return;if(a==="load"){loadHistoryRecord(id);closeHistoryModal()}else if(a==="export")await exportHistoryRecord(id);else if(a==="delete")deleteHistoryRecord(id);else if(a==="open-drive"){const r=getHistory().find(i=>i.id===id);if(r?.driveUrl)window.open(r.driveUrl,"_blank","noopener,noreferrer")}});
   updateKeyboardVH();if(window.visualViewport){window.visualViewport.addEventListener("resize",updateKeyboardVH);window.visualViewport.addEventListener("scroll",updateKeyboardVH)}else window.addEventListener("resize",updateKeyboardVH);
 }
