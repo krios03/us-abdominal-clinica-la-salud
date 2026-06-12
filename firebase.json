@@ -31,6 +31,19 @@
       }
     ],
     "cleanUrls": false,
-    "trailingSlash": false
+    "trailingSlash": false,
+    "rewrites": [
+      {
+        "source": "/api/transcribe",
+        "function": {
+          "functionId": "transcribe",
+          "region": "us-central1"
+        }
+      }
+    ]
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs22"
   }
 }

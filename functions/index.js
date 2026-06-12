@@ -1,4 +1,4 @@
-﻿const { onRequest } = require("firebase-functions/v2/https");
+const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 
 const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
@@ -8,7 +8,7 @@ function jsonError(res, status, message) {
 }
 
 exports.transcribe = onRequest(
-  { region: "us-central1", cors: true, timeoutSeconds: 90, memory: "512MiB", secrets: [OPENAI_API_KEY] },
+  { region: "us-central1", cors: true, invoker: "public", timeoutSeconds: 90, memory: "512MiB", secrets: [OPENAI_API_KEY] },
   async (req, res) => {
     if (req.method === "OPTIONS") {
       res.set("Access-Control-Allow-Origin", "*");
