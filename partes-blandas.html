@@ -440,10 +440,9 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
           </div>
           <div class="share-actions">
             <button class="btn success" id="btnSharePdfFile">Compartir PDF como archivo</button>
-            <button class="btn primary" id="btnSharePdfDirect">Descargar y abrir WhatsApp +504 3247-8786</button>
             <button class="btn" id="btnDownloadPdfReady">Descargar PDF</button>
           </div>
-          <p class="share-note" id="pdfShareNote">WhatsApp no permite adjuntar automáticamente un PDF a un número específico desde la web. Para ese contacto, descargue el PDF y adjúntelo en el chat que se abrirá.</p>
+          <p class="share-note" id="pdfShareNote">El PDF esta listo. Puede compartirlo como archivo si el navegador lo permite o descargarlo en el dispositivo.</p>
         </div>
       </div>
     </div>
@@ -480,7 +479,6 @@ const DEFAULT_SETTINGS = {
 
 const DRAFT_KEY = "partesBlandasDraft", HISTORY_KEY = "partesBlandasHistory", SETTINGS_KEY = "partesBlandasSettings";
 const HISTORY_MAX = 120;
-const WHATSAPP_DIRECT_PHONE = "50432478786";
 
 const app = {activeField:null,mediaRecorder:null,mediaStream:null,audioChunks:[],isListening:false,isPaused:false,recordingCanceled:false,voiceSupported:true,
   transcriptBase:"",transcriptBuffer:"",lastTranscriptFieldId:null,lastTranscriptOriginal:"",guardEnabled:true,settings:{...DEFAULT_SETTINGS},googleTokenClient:null,pdfBlob:null,pdfFileName:"",pdfUrl:"",deferredInstallPrompt:null};
@@ -533,7 +531,7 @@ function cacheEls(){
   el.btnSaveSnapshot=document.getElementById("btnSaveSnapshot");
   el.pdfShareBackdrop=document.getElementById("pdfShareBackdrop"); el.pdfShareFileName=document.getElementById("pdfShareFileName");
   el.pdfShareNote=document.getElementById("pdfShareNote"); el.btnClosePdfShare=document.getElementById("btnClosePdfShare");
-  el.btnSharePdfFile=document.getElementById("btnSharePdfFile"); el.btnSharePdfDirect=document.getElementById("btnSharePdfDirect");
+  el.btnSharePdfFile=document.getElementById("btnSharePdfFile");
   el.btnDownloadPdfReady=document.getElementById("btnDownloadPdfReady");
   el.btnOpenSettings=document.getElementById("btnOpenSettings"); el.btnCloseSettings=document.getElementById("btnCloseSettings");
   el.autosaveStatus=document.getElementById("autosaveStatus");
@@ -986,7 +984,8 @@ function applyAiTextToField(){
 
 /* ── PDF ── */
 function buildFileName(){
-  const d=getFormData();const n=(d.nombre||"Paciente").replace(/[^a-zA-Z0-9_-]+/g,"_");
+  const d=getFormData();const rawName=(d.nombre||"Paciente").trim();
+  const n=(rawName.normalize?rawName.normalize("NFD").replace(/[\u0300-\u036f]/g,""):rawName).replace(/[^a-zA-Z0-9_-]+/g,"_").replace(/^_+|_+$/g,"")||"Paciente";
   const now=new Date();return `Reporte_Partes_Blandas_${n}_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}.pdf`
 }
 function fitLine(pdf,text,maxW){const s=String(text||"").trim();if(!s)return"";let o=s;while(pdf.getTextWidth(o)>maxW&&o.length>1)o=`${o.slice(0,-2)}…`;return o}
@@ -1064,8 +1063,8 @@ function setCurrentPdf(blob,fileName){
   const canShareFile=!!(navigator.canShare&&window.File&&navigator.canShare({files:[new File([blob],fileName,{type:"application/pdf"})]}));
   if(el.btnSharePdfFile)el.btnSharePdfFile.disabled=!canShareFile;
   if(el.pdfShareNote)el.pdfShareNote.textContent=canShareFile
-    ?"Use “Compartir PDF como archivo” para enviar el PDF con el menú del teléfono. Para el número fijo, use “Descargar y abrir WhatsApp” y adjunte el archivo descargado."
-    :"Este navegador no permite compartir el PDF como archivo. Use “Descargar y abrir WhatsApp” y adjunte el archivo descargado.";
+    ?"Use Compartir PDF como archivo para enviarlo desde el menu del telefono."
+    :"Este navegador no permite compartir el PDF como archivo. Use Descargar PDF.";
 }
 function openPdfShareModal(){
   if(!app.pdfBlob){setStatus("Primero genere un PDF.","warn");return}
@@ -1091,13 +1090,6 @@ async function shareCurrentPdfFile(){
     await navigator.share({title:"Reporte de Ultrasonido de Partes Blandas",text:getPdfShareText(),files:[file]});
     addToHistory("local",{fileName:app.pdfFileName||buildFileName()});setStatus("PDF compartido.","ok");vibrate([30,50,30])
   }catch(e){if(e.name!=="AbortError")setStatus(`No se pudo compartir: ${e.message}`,"danger")}
-}
-function openWhatsAppDirect(){
-  if(!app.pdfBlob){setStatus("Primero genere un PDF.","warn");return}
-  downloadCurrentPdf();
-  const url=`https://wa.me/${WHATSAPP_DIRECT_PHONE}?text=${encodeURIComponent(getPdfShareText()+"\n\nPor favor revise el PDF del reporte. El archivo debe adjuntarse desde la descarga del dispositivo.")}`;
-  window.open(url,"_blank","noopener");
-  setStatus("PDF descargado y WhatsApp abierto. Adjunte el archivo descargado en el chat.","info");vibrate(10)
 }
 async function exportPdfToDownload(){
   const d=getFormData();const fc=Object.values(d).filter(v=>v.trim()).length;
@@ -1186,7 +1178,6 @@ function attachEvents(){
   if(el.btnClosePdfShare)el.btnClosePdfShare.addEventListener("click",closePdfShareModal);
   if(el.pdfShareBackdrop)el.pdfShareBackdrop.addEventListener("click",e=>{if(e.target===el.pdfShareBackdrop)closePdfShareModal()});
   if(el.btnSharePdfFile)el.btnSharePdfFile.addEventListener("click",shareCurrentPdfFile);
-  if(el.btnSharePdfDirect)el.btnSharePdfDirect.addEventListener("click",openWhatsAppDirect);
   if(el.btnDownloadPdfReady)el.btnDownloadPdfReady.addEventListener("click",downloadCurrentPdf);
   if(el.historyList)el.historyList.addEventListener("click",async ev=>{const t=ev.target.closest("button[data-ha]");if(!t)return;const a=t.getAttribute("data-ha"),id=t.getAttribute("data-hid");if(!id)return;if(a==="load"){loadHistoryRecord(id);closeHistoryModal()}else if(a==="export")await exportHistoryRecord(id);else if(a==="delete")deleteHistoryRecord(id);else if(a==="open-drive"){const r=getHistory().find(i=>i.id===id);if(r?.driveUrl)window.open(r.driveUrl,"_blank","noopener,noreferrer")}});
   updateKeyboardVH();if(window.visualViewport){window.visualViewport.addEventListener("resize",updateKeyboardVH);window.visualViewport.addEventListener("scroll",updateKeyboardVH)}else window.addEventListener("resize",updateKeyboardVH);
