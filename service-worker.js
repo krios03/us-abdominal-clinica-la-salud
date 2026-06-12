@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'ultra-clinica-la-salud-v3-20260612-menu-fix';
+﻿const CACHE_NAME = 'ultra-clinica-la-salud-v4-20260612-obst-mobile-fix';
 const APP_SHELL = [
   './index.html',
   './obstetrico.html',
@@ -25,6 +25,10 @@ self.addEventListener('activate', event => {
   );
 });
 
+function urlPathFromRequest(request) {
+  try { return new URL(request.url).pathname; } catch (error) { return ""; }
+}
+
 async function networkFirst(request) {
   const cache = await caches.open(CACHE_NAME);
   try {
@@ -32,7 +36,7 @@ async function networkFirst(request) {
     if (response.ok) cache.put(request, response.clone());
     return response;
   } catch (error) {
-    return (await cache.match(request)) || (await cache.match('./index.html'));
+    return (await cache.match(request)) || (urlPathFromRequest(request)==='/' ? await cache.match('./index.html') : Response.error());
   }
 }
 
