@@ -34,6 +34,7 @@ input,textarea,button{-webkit-user-select:text;user-select:text}
 .exam-switch select{appearance:none;-webkit-appearance:none;border:1.5px solid #8fb8c7;border-radius:10px;background:linear-gradient(180deg,#f8fdff,#eaf5f8);color:#123;font-family:"Atkinson Hyperlegible Next",sans-serif;font-size:.92rem;font-weight:800;min-height:42px;padding:8px 34px 8px 12px;max-width:210px;background-image:linear-gradient(45deg,transparent 50%,#155e75 50%),linear-gradient(135deg,#155e75 50%,transparent 50%);background-position:calc(100% - 18px) 18px,calc(100% - 12px) 18px;background-size:6px 6px,6px 6px;background-repeat:no-repeat}
 .exam-switch select:focus-visible{outline:3px solid #7ac3d6;outline-offset:2px}
 .exam-report-menu{display:none}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 .exam-menu-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .exam-chip{border:1.5px solid #9fb3bf;background:#f7fbfd;color:#123;text-decoration:none;border-radius:12px;font-size:.98rem;font-weight:800;min-height:46px;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 12px;box-shadow:0 4px 12px rgba(21,94,117,.06)}
 .exam-chip.active{background:#155e75;border-color:#0e485b;color:#fff}
@@ -223,18 +224,17 @@ body.keyboard-open .dictation-fab.visible{transform:translateY(-6px);min-height:
 .exam-switch span{font-size:1rem}
 .exam-switch select{width:100%;max-width:none;min-height:56px;font-size:1.08rem;padding:12px 42px 12px 14px;border-radius:12px;background-position:calc(100% - 22px) 25px,calc(100% - 14px) 25px;background-size:8px 8px,8px 8px}
 .exam-switch{display:none}
-.exam-report-menu{width:100%;display:block;border:1px solid #c6d8df;border-radius:14px;background:linear-gradient(90deg,#ffffff,#eef8fb);box-shadow:0 4px 12px rgba(21,94,117,.08);overflow:hidden}
-.exam-report-menu summary{list-style:none;min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;font-size:1.08rem;font-weight:900;color:var(--brand-dark);cursor:pointer}
+.exam-report-menu{width:56px;height:56px;display:block;border:1px solid #c6d8df;border-radius:14px;background:#fff;box-shadow:0 4px 12px rgba(21,94,117,.08);overflow:visible;position:relative}
+.exam-report-menu summary{list-style:none;width:56px;height:56px;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
 .exam-report-menu summary::-webkit-details-marker{display:none}
 .exam-report-menu summary::before{content:"";width:24px;height:18px;flex:0 0 24px;background:linear-gradient(#155e75 0 3px,transparent 3px 7px,#155e75 7px 10px,transparent 10px 14px,#155e75 14px 17px);border-radius:2px}
-.exam-report-menu summary::after{content:"Abrir";font-size:.82rem;color:#4f5d6e;background:#fff;border:1px solid #cbdbe3;border-radius:999px;padding:4px 8px}
-.exam-report-menu[open] summary::after{content:"Cerrar"}
-.exam-menu-list{padding:0 10px 10px}
+.exam-report-menu summary::after{display:none}
+.exam-menu-list{position:absolute;left:0;right:auto;top:62px;width:min(320px,calc(100vw - 20px));padding:10px;background:#fff;border:1px solid #c6d8df;border-radius:14px;box-shadow:0 14px 28px rgba(21,94,117,.18);z-index:80}
 .exam-chip{width:100%;min-height:48px;font-size:1rem;justify-content:flex-start;padding:10px 14px}
 .exam-chip.active{box-shadow:0 8px 18px rgba(21,94,117,.22)}
 .app-bar{align-items:flex-start;flex-direction:column}
 .app-title,.app-bar-actions{width:100%}
-.app-bar-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.app-bar-actions{position:relative;display:grid;grid-template-columns:56px repeat(3,minmax(0,1fr)) 46px;gap:5px;align-items:start;overflow:visible}
 .app-bar-actions .btn{width:100%;padding-left:6px;padding-right:6px}
 .autosave-status,.progress-status{max-width:100%}
 .field-line{flex-wrap:wrap}
@@ -283,7 +283,7 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
       </div>
     </div>
     <div class="app-bar-actions">
-      <label class="exam-switch"><span>Examen</span><select id="examSelector"><option value="index.html">Abdominal</option><option value="obstetrico.html">Obstétrico</option><option value="mama.html">Mama</option><option value="pelvico.html">Pélvico</option><option value="prostatico.html" selected>Prostático</option><option value="partes-blandas.html">Partes blandas</option></select></label><details class="exam-report-menu"><summary>Tipo de reporte: Prostatico</summary><nav class="exam-menu-list" aria-label="Tipos de reporte"><a class="exam-chip" href="index.html">Abdominal</a><a class="exam-chip" href="obstetrico.html">Obstetrico</a><a class="exam-chip" href="mama.html">Mama</a><a class="exam-chip" href="pelvico.html">Pelvico</a><a class="exam-chip active" href="prostatico.html">Prostatico</a><a class="exam-chip" href="partes-blandas.html">Partes blandas</a></nav></details>
+      <label class="exam-switch"><span>Examen</span><select id="examSelector"><option value="index.html">Abdominal</option><option value="obstetrico.html">Obstétrico</option><option value="mama.html">Mama</option><option value="pelvico.html">Pélvico</option><option value="prostatico.html" selected>Prostático</option><option value="partes-blandas.html">Partes blandas</option></select></label><details class="exam-report-menu"><summary aria-label="Seleccionar tipo de reporte" title="Seleccionar tipo de reporte"><span class="sr-only">Tipo de reporte: Prostatico</span></summary><nav class="exam-menu-list" aria-label="Tipos de reporte"><a class="exam-chip" href="index.html">Abdominal</a><a class="exam-chip" href="obstetrico.html">Obstetrico</a><a class="exam-chip" href="mama.html">Mama</a><a class="exam-chip" href="pelvico.html">Pelvico</a><a class="exam-chip active" href="prostatico.html">Prostatico</a><a class="exam-chip" href="partes-blandas.html">Partes blandas</a></nav></details>
       <button class="btn small ghost" id="btnClearForm">Nuevo</button>
       <button class="btn small" id="btnOpenHistory">Historial</button>
       <button class="btn small primary" id="btnExportPdf">PDF</button>
@@ -1140,7 +1140,7 @@ async function savePdfToDrive(){
 
 /* ?? PWA ?? */
 function setupPwaInstall(){
-  if("serviceWorker" in navigator)navigator.serviceWorker.register("service-worker.js?v=20260610-refresh").then(r=>r.update()).catch(e=>console.warn("SW registration failed",e));
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("service-worker.js?v=20260612-menu-fix",{updateViaCache:"none"}).then(r=>r.update()).catch(e=>console.warn("SW registration failed",e));
   window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();app.deferredInstallPrompt=e;if(el.btnInstallPwa)el.btnInstallPwa.disabled=false});
   window.addEventListener("appinstalled",()=>{app.deferredInstallPrompt=null;setStatus("App instalada correctamente.","ok")});
   navigator.serviceWorker?.addEventListener?.("controllerchange",()=>{if(!sessionStorage.getItem("swReloaded")){sessionStorage.setItem("swReloaded","1");location.reload()}})

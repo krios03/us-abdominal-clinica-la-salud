@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'ultra-clinica-la-salud-v2-20260610165340';
+﻿const CACHE_NAME = 'ultra-clinica-la-salud-v3-20260612-menu-fix';
 const APP_SHELL = [
   './index.html',
   './obstetrico.html',
