@@ -56,8 +56,9 @@ input,textarea,button{-webkit-user-select:text;user-select:text}
 .field-line input{flex:1;border:none;border-bottom:2px solid var(--line);border-radius:0;padding:4px 3px 8px;font-size:16px;height:40px;line-height:1.35;font-family:"Source Serif 4",serif;background:transparent;min-width:0;overflow:visible}
 .field-block{border-bottom:2px solid #222;min-height:60px;margin-bottom:6px}
 .field-block textarea{border:none;border-radius:0;resize:none;width:100%;min-height:56px;padding:6px 3px;font-size:16px;font-family:"Source Serif 4",serif;line-height:1.3;background:transparent}
-.signature-block{min-height:42px;margin-top:4px}
-.signature-block textarea{min-height:34px!important;height:34px!important;line-height:1.2;padding:4px 3px 6px}
+.signature-block{min-height:52px;margin:10px 0 2px;border-bottom:none!important;display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-end;padding-top:4px}
+.signature-block label{width:min(260px,70%);text-align:center;color:#48606b;font-size:12px!important;font-weight:700!important;order:2;margin-top:2px}
+.signature-block textarea{width:min(260px,70%)!important;min-height:30px!important;height:30px!important;line-height:1.2;padding:2px 3px 4px!important;text-align:center;border-bottom:2px solid #24313a!important;background:transparent!important;font-style:italic;resize:none}
 .active-target{outline:3px solid #79bdd4;outline-offset:3px;background:#f1fbff!important;border-radius:3px}
 .btn{border:1.5px solid #9fb3bf;background:#f7fbfd;color:#123;padding:10px 12px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-family:"Atkinson Hyperlegible Next",sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;white-space:nowrap;transition:transform .1s,filter .1s,box-shadow .1s;flex-shrink:0}
 a.btn{text-decoration:none}
@@ -182,7 +183,7 @@ body.editing-transcript #btnConfirmTranscriptEdit{display:inline-flex}
 .pdf-render .field-line input{font-size:14px!important;height:30px!important;padding:3px 3px 7px!important;line-height:1.35!important;overflow:visible!important}
 .pdf-render .field-block textarea{font-size:13px!important;min-height:60px!important;overflow:visible!important;white-space:pre-wrap!important;word-wrap:break-word!important;height:auto!important}
 .pdf-render .field-block{min-height:.95in!important;overflow:visible!important;height:auto!important}
-.pdf-render .signature-block{min-height:.42in!important}
+.pdf-render .signature-block{min-height:.36in!important;border-bottom:none!important}
 .dictation-fab{position:fixed;right:14px;bottom:calc(14px + var(--keyboard-offset,0px));z-index:90;box-shadow:0 10px 22px rgba(21,94,117,.24);display:none;transition:bottom .18s ease,transform .18s ease}
 .dictation-fab.visible{display:inline-flex}
 body.modal-open .dictation-fab.visible{display:none!important}
@@ -1076,6 +1077,14 @@ async function generatePdfBlob(){
   lineField("Edad",data.edad||"",L,100);lineField("Sexo",data.sexo||"",L+112,100);lineField("Fecha",data.fecha||"",L+224,155);y+=20;
   const drawBlock=(section)=>{
     const {title,lines,boxHeight}=section;
+    if(title==="Firma medico"){
+      const lineW=Math.min(230,contentW*.46),x=R-lineW,top=y+8;
+      pdf.setDrawColor(58,72,80);pdf.setLineWidth(.7);pdf.line(x,top+18,R,top+18);
+      pdf.setTextColor(72,96,107);pdf.setFont("times","bold");pdf.setFontSize(9.5);pdf.text("Firma medico",x+lineW/2,top+31,{align:"center"});
+      pdf.setTextColor(17,17,17);pdf.setFont("times","italic");pdf.setFontSize(Math.min(12,layout.fontSize));
+      const t=fitLine(pdf,lines.join(" "),lineW-8);if(t)pdf.text(t,x+lineW/2,top+13,{align:"center"});
+      y=top+38;return
+    }
     pdf.setTextColor(18,72,91);pdf.setFont("times","bold");pdf.setFontSize(10.5);pdf.text(title,L,y+9);
     y+=titleHeight;const top=y;pdf.setFillColor(250,253,254);pdf.setDrawColor(196,217,225);pdf.setLineWidth(.55);pdf.roundedRect(L,top,contentW,boxHeight,3,3,"FD");
     pdf.setFillColor(21,94,117);pdf.rect(L,top,3,boxHeight,"F");
