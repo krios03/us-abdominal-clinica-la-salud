@@ -56,6 +56,8 @@ input,textarea,button{-webkit-user-select:text;user-select:text}
 .field-line input{flex:1;border:none;border-bottom:2px solid var(--line);border-radius:0;padding:4px 3px 8px;font-size:16px;height:40px;line-height:1.35;font-family:"Source Serif 4",serif;background:transparent;min-width:0;overflow:visible}
 .field-block{border-bottom:2px solid #222;min-height:60px;margin-bottom:6px}
 .field-block textarea{border:none;border-radius:0;resize:none;width:100%;min-height:56px;padding:6px 3px;font-size:16px;font-family:"Source Serif 4",serif;line-height:1.3;background:transparent}
+.signature-block{min-height:42px;margin-top:4px}
+.signature-block textarea{min-height:34px!important;height:34px!important;line-height:1.2;padding:4px 3px 6px}
 .active-target{outline:3px solid #79bdd4;outline-offset:3px;background:#f1fbff!important;border-radius:3px}
 .btn{border:1.5px solid #9fb3bf;background:#f7fbfd;color:#123;padding:10px 12px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-family:"Atkinson Hyperlegible Next",sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;white-space:nowrap;transition:transform .1s,filter .1s,box-shadow .1s;flex-shrink:0}
 a.btn{text-decoration:none}
@@ -180,6 +182,7 @@ body.editing-transcript #btnConfirmTranscriptEdit{display:inline-flex}
 .pdf-render .field-line input{font-size:14px!important;height:30px!important;padding:3px 3px 7px!important;line-height:1.35!important;overflow:visible!important}
 .pdf-render .field-block textarea{font-size:13px!important;min-height:60px!important;overflow:visible!important;white-space:pre-wrap!important;word-wrap:break-word!important;height:auto!important}
 .pdf-render .field-block{min-height:.95in!important;overflow:visible!important;height:auto!important}
+.pdf-render .signature-block{min-height:.42in!important}
 .dictation-fab{position:fixed;right:14px;bottom:calc(14px + var(--keyboard-offset,0px));z-index:90;box-shadow:0 10px 22px rgba(21,94,117,.24);display:none;transition:bottom .18s ease,transform .18s ease}
 .dictation-fab.visible{display:inline-flex}
 body.modal-open .dictation-fab.visible{display:none!important}
@@ -279,7 +282,7 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
       <h1>US Partes Blandas - Clínica La Salud</h1>
       <div class="app-meta">
         <span class="autosave-status" id="autosaveStatus">Protección activa: guardado automático local</span>
-        <span class="progress-status" id="reportProgress">0/13 campos</span>
+        <span class="progress-status" id="reportProgress">0/6 campos</span>
       </div>
     </div>
     <div class="app-bar-actions">
@@ -330,6 +333,12 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
           <label style="font-weight:700;font-size:14px">Descripción</label>
           <textarea data-field="descripcion" rows="10" placeholder="Descripción de región evaluada y hallazgos..." autocomplete="off"></textarea>
         </div>
+
+
+        <div class="field-block signature-block">
+          <label style="font-weight:700;font-size:14px">Firma medico</label>
+          <textarea data-field="firma" rows="1" placeholder="Nombre, sello o firma..." autocomplete="off"></textarea>
+        </div>
       </article>
     </main>
 
@@ -344,7 +353,7 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
         <h3>Resumen</h3>
         <div class="summary-row"><span>Paciente</span><span id="summaryPatient">Sin nombre</span></div>
         <div class="summary-row"><span>Fecha</span><span id="summaryDate">Sin fecha</span></div>
-        <div class="summary-row"><span>Avance</span><span id="summaryProgress">0/13</span></div>
+        <div class="summary-row"><span>Avance</span><span id="summaryProgress">0/6</span></div>
         <button class="btn ghost" id="btnClearFormSidebar" style="margin-top:10px;width:100%">Nuevo reporte</button>
       </div>
     </aside>
@@ -480,7 +489,7 @@ const FIELD_LABELS = {
   edad:"Edad",
   fecha:"Fecha",
   sexo:"Sexo",
-  descripcion:"Descripción"
+  descripcion:"Descripción", firma:"Firma medico"
 };
 
 const FIELD_EXPECTATIONS = {
@@ -488,7 +497,8 @@ const FIELD_EXPECTATIONS = {
   edad:"Edad del paciente en años.",
   fecha:"Fecha del estudio en formato DD/MM/AAAA.",
   sexo:"Sexo del paciente registrado por la clínica.",
-  descripcion:"Descripción de partes blandas: región evaluada, tejido subcutáneo, músculo, colecciones, masas, hernias, ganglios o edema."
+  descripcion:"Descripción de partes blandas: región evaluada, tejido subcutáneo, músculo, colecciones, masas, hernias, ganglios o edema.",
+  firma:"Firma o nombre del medico responsable del reporte."
 };
 
 const DEFAULT_SETTINGS = {
@@ -1023,7 +1033,7 @@ async function generatePdfBlob(){
   const pw=612,ph=792,L=24,R=pw-24,B=ph-24,contentW=R-L;let y=24;
   const lL=optimizeLogo(el.logoLeft,.42),lR=optimizeLogo(el.logoRight,.38);
   const sections=[
-    ["Descripción",data.descripcion||""]
+    ["Descripción",data.descripcion||""],["Firma medico",data.firma||""]
   ];
   const headerHeight=58+12+20+20,footerHeight=14,sectionGap=5,titleHeight=14,boxPadY=14,minBox=24;
   const available=B-24-headerHeight-footerHeight;
