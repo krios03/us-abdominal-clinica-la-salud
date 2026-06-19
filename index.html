@@ -279,7 +279,7 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
       <h1>US Abdominal - Clínica La Salud</h1>
       <div class="app-meta">
         <span class="autosave-status" id="autosaveStatus">Protección activa: guardado automático local</span>
-        <span class="progress-status" id="reportProgress">0/13 campos</span>
+        <span class="progress-status" id="reportProgress">0/15 campos</span>
       </div>
     </div>
     <div class="app-bar-actions">
@@ -356,6 +356,16 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
         </div>
 
         <div class="field-block">
+          <label style="font-weight:700;font-size:14px">Próstata</label>
+          <textarea data-field="prostata" rows="1" placeholder="Tamaño, volumen, ecogenicidad, lesiones..." autocomplete="off"></textarea>
+        </div>
+
+        <div class="field-block">
+          <label style="font-weight:700;font-size:14px">Apéndice</label>
+          <textarea data-field="apendice" rows="1" placeholder="Visualización, calibre, compresibilidad, signos inflamatorios..." autocomplete="off"></textarea>
+        </div>
+
+        <div class="field-block">
           <label style="font-weight:700;font-size:14px">Vejiga</label>
           <textarea data-field="vejiga" rows="1" placeholder="Pared, contenido, repleción..." autocomplete="off"></textarea>
         </div>
@@ -383,7 +393,7 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
         <h3>Resumen</h3>
         <div class="summary-row"><span>Paciente</span><span id="summaryPatient">Sin nombre</span></div>
         <div class="summary-row"><span>Fecha</span><span id="summaryDate">Sin fecha</span></div>
-        <div class="summary-row"><span>Avance</span><span id="summaryProgress">0/13</span></div>
+        <div class="summary-row"><span>Avance</span><span id="summaryProgress">0/15</span></div>
         <button class="btn ghost" id="btnClearFormSidebar" style="margin-top:10px;width:100%">Nuevo reporte</button>
       </div>
     </aside>
@@ -517,7 +527,7 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
 const FIELD_LABELS = {
   nombre:"Nombre", fecha:"Fecha", edad:"Edad", sexo:"Sexo", indicacion:"Indicación",
   higado:"Hígado", vesicula:"Vesícula Biliar", pancreas:"Páncreas",
-  rinones:"Riñones", bazo:"Bazo", vejiga:"Vejiga",
+  rinones:"Riñones", bazo:"Bazo", prostata:"Próstata", apendice:"Apéndice", vejiga:"Vejiga",
   dx:"Dx", conclusion:"Conclusión"
 };
 
@@ -532,6 +542,8 @@ const FIELD_EXPECTATIONS = {
   pancreas:"Descripción del páncreas: cabeza, cuerpo, cola, tamaño, ecogenicidad, lesiones ocupativas, conducto de Wirsung.",
   rinones:"Descripción de ambos riñones: tamaño (longitud x AP en cm), parénquima, relación corticomedular, litiasis, quistes, hidronefrosis.",
   bazo:"Descripción del bazo: tamaño (longitud en cm), homogeneidad, lesiones, esplenomegalia.",
+  prostata:"Descripcion de la prostata cuando aplique: tamano, volumen aproximado, ecogenicidad, calcificaciones o lesiones focales.",
+  apendice:"Descripcion del apendice cuando aplique: visualizacion, calibre, compresibilidad, apendicolito, liquido o cambios inflamatorios.",
   vejiga:"Descripción de la vejiga: pared, contenido anecogénico, repleción, lesiones, residuo post-miccional.",
   dx:"Diagnóstico(s) ultrasonográfico(s). Usar terminología médica estándar.",
   conclusion:"Resumen de hallazgos relevantes y recomendaciones clínicas."
@@ -1071,6 +1083,7 @@ async function generatePdfBlob(){
   const sections=[
     ["Indicación",data.indicacion||""],["Hígado",data.higado||""],["Vesícula Biliar",data.vesicula||""],
     ["Páncreas",data.pancreas||""],["Riñones",data.rinones||""],["Bazo",data.bazo||""],
+    ["Próstata",data.prostata||""],["Apéndice",data.apendice||""],
     ["Vejiga",data.vejiga||""],["Dx",data.dx||""],["Conclusión",data.conclusion||""]
   ];
   const headerHeight=58+12+20+20,footerHeight=14,sectionGap=5,titleHeight=14,boxPadY=14,minBox=24;
