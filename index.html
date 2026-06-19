@@ -386,7 +386,7 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
 
 
         <div class="field-block signature-block">
-          <label style="font-weight:700;font-size:14px">Firma medico</label>
+          <label style="font-weight:700;font-size:14px">Firma médico</label>
           <textarea data-field="firma" rows="1" placeholder="Nombre, sello o firma..." autocomplete="off"></textarea>
         </div>
       </article>
@@ -538,7 +538,7 @@ const FIELD_LABELS = {
   nombre:"Nombre", fecha:"Fecha", edad:"Edad", sexo:"Sexo", indicacion:"Indicación",
   higado:"Hígado", vesicula:"Vesícula Biliar", pancreas:"Páncreas",
   rinones:"Riñones", bazo:"Bazo", prostata:"Próstata", apendice:"Apéndice", vejiga:"Vejiga",
-  dx:"Dx", firma:"Firma medico", conclusion:"Conclusión"
+  dx:"Dx", firma:"Firma médico", conclusion:"Conclusión"
 };
 
 const FIELD_EXPECTATIONS = {
@@ -557,7 +557,7 @@ const FIELD_EXPECTATIONS = {
   vejiga:"Descripción de la vejiga: pared, contenido anecogénico, repleción, lesiones, residuo post-miccional.",
   dx:"Diagnóstico(s) ultrasonográfico(s). Usar terminología médica estándar.",
   conclusion:"Resumen de hallazgos relevantes y recomendaciones clínicas.",
-  firma:"Firma o nombre del medico responsable del reporte."
+  firma:"Firma o nombre del médico responsable del reporte."
 };
 
 const DEFAULT_SETTINGS = {
@@ -1095,7 +1095,7 @@ async function generatePdfBlob(){
     ["Indicación",data.indicacion||""],["Hígado",data.higado||""],["Vesícula Biliar",data.vesicula||""],
     ["Páncreas",data.pancreas||""],["Riñones",data.rinones||""],["Bazo",data.bazo||""],
     ["Próstata",data.prostata||""],["Apéndice",data.apendice||""],
-    ["Vejiga",data.vejiga||""],["Dx",data.dx||""],["Conclusión",data.conclusion||""],["Firma medico",data.firma||""]
+    ["Vejiga",data.vejiga||""],["Dx",data.dx||""],["Conclusión",data.conclusion||""],["Firma médico",data.firma||""]
   ];
   const headerHeight=58+12+20+20,footerHeight=14,sectionGap=5,titleHeight=14,boxPadY=14,minBox=24;
   const available=B-24-headerHeight-footerHeight;
@@ -1135,10 +1135,10 @@ async function generatePdfBlob(){
   lineField("Edad",data.edad||"",L,100);lineField("Sexo",data.sexo||"",L+112,100);lineField("Fecha",data.fecha||"",L+224,155);y+=20;
   const drawBlock=(section)=>{
     const {title,lines,boxHeight}=section;
-    if(title==="Firma medico"){
+    if(title==="Firma médico"){
       const lineW=Math.min(230,contentW*.46),x=R-lineW,top=y+8;
       pdf.setDrawColor(58,72,80);pdf.setLineWidth(.7);pdf.line(x,top+18,R,top+18);
-      pdf.setTextColor(72,96,107);pdf.setFont("times","bold");pdf.setFontSize(9.5);pdf.text("Firma medico",x+lineW/2,top+31,{align:"center"});
+      pdf.setTextColor(72,96,107);pdf.setFont("times","bold");pdf.setFontSize(9.5);pdf.text("Firma médico",x+lineW/2,top+31,{align:"center"});
       pdf.setTextColor(17,17,17);pdf.setFont("times","italic");pdf.setFontSize(Math.min(12,layout.fontSize));
       const t=fitLine(pdf,lines.join(" "),lineW-8);if(t)pdf.text(t,x+lineW/2,top+13,{align:"center"});
       y=top+38;return

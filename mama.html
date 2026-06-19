@@ -340,7 +340,7 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
 
 
         <div class="field-block signature-block">
-          <label style="font-weight:700;font-size:14px">Firma medico</label>
+          <label style="font-weight:700;font-size:14px">Firma médico</label>
           <textarea data-field="firma" rows="1" placeholder="Nombre, sello o firma..." autocomplete="off"></textarea>
         </div>
       </article>
@@ -493,7 +493,7 @@ const FIELD_LABELS = {
   edad:"Edad",
   fecha:"Fecha",
   mama_derecha:"Mama derecha",
-  mama_izquierda:"Mama izquierda", firma:"Firma medico"
+  mama_izquierda:"Mama izquierda", firma:"Firma médico"
 };
 
 const FIELD_EXPECTATIONS = {
@@ -502,7 +502,7 @@ const FIELD_EXPECTATIONS = {
   fecha:"Fecha del estudio en formato DD/MM/AAAA.",
   mama_derecha:"Descripción de mama derecha: tejido, nódulos, quistes, conductos, lesiones, axila si aplica.",
   mama_izquierda:"Descripción de mama izquierda: tejido, nódulos, quistes, conductos, lesiones, axila si aplica.",
-  firma:"Firma o nombre del medico responsable del reporte."
+  firma:"Firma o nombre del médico responsable del reporte."
 };
 
 const DEFAULT_SETTINGS = {
@@ -1037,7 +1037,7 @@ async function generatePdfBlob(){
   const pw=612,ph=792,L=24,R=pw-24,B=ph-24,contentW=R-L;let y=24;
   const lL=optimizeLogo(el.logoLeft,.42),lR=optimizeLogo(el.logoRight,.38);
   const sections=[
-    ["Mama derecha",data.mama_derecha||""],["Mama izquierda",data.mama_izquierda||""],["Firma medico",data.firma||""]
+    ["Mama derecha",data.mama_derecha||""],["Mama izquierda",data.mama_izquierda||""],["Firma médico",data.firma||""]
   ];
   const headerHeight=58+12+20+20,footerHeight=14,sectionGap=5,titleHeight=14,boxPadY=14,minBox=24;
   const available=B-24-headerHeight-footerHeight;
@@ -1077,10 +1077,10 @@ async function generatePdfBlob(){
   lineField("Edad",data.edad||"",L,100);lineField("Sexo",data.sexo||"",L+112,100);lineField("Fecha",data.fecha||"",L+224,155);y+=20;
   const drawBlock=(section)=>{
     const {title,lines,boxHeight}=section;
-    if(title==="Firma medico"){
+    if(title==="Firma médico"){
       const lineW=Math.min(230,contentW*.46),x=R-lineW,top=y+8;
       pdf.setDrawColor(58,72,80);pdf.setLineWidth(.7);pdf.line(x,top+18,R,top+18);
-      pdf.setTextColor(72,96,107);pdf.setFont("times","bold");pdf.setFontSize(9.5);pdf.text("Firma medico",x+lineW/2,top+31,{align:"center"});
+      pdf.setTextColor(72,96,107);pdf.setFont("times","bold");pdf.setFontSize(9.5);pdf.text("Firma médico",x+lineW/2,top+31,{align:"center"});
       pdf.setTextColor(17,17,17);pdf.setFont("times","italic");pdf.setFontSize(Math.min(12,layout.fontSize));
       const t=fitLine(pdf,lines.join(" "),lineW-8);if(t)pdf.text(t,x+lineW/2,top+13,{align:"center"});
       y=top+38;return
