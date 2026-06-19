@@ -72,6 +72,7 @@ a.btn{text-decoration:none}
 .btn.close{background:#f0f0f0;border-color:#ccc;font-size:1.2rem;padding:6px 12px;min-height:38px}
 .btn-today{background:#e8f4fd;border-color:#6aaac8;font-size:.75rem;padding:4px 10px;min-height:30px;border-radius:8px;flex-shrink:0}
 .btn:disabled{opacity:.45;pointer-events:none}
+.settings-icon{width:19px;height:19px;display:block;fill:currentColor}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #7ac3d6;outline-offset:2px}
 @keyframes recPulse{0%{box-shadow:0 0 0 0 rgba(191,31,31,.45)}70%{box-shadow:0 0 0 12px rgba(191,31,31,0)}100%{box-shadow:0 0 0 0 rgba(191,31,31,0)}}
 #btnStartVoice.is-recording{background:#f9dede;border-color:#be2d2d;color:#7d0f0f;animation:recPulse 1.25s infinite}
@@ -292,7 +293,7 @@ body.editing-transcript .dictation-main .transcript-box{min-height:40dvh;max-hei
       <button class="btn small" id="btnOpenHistory">Historial</button>
       <button class="btn small primary" id="btnExportPdf">PDF</button>
       <button class="btn small success" id="btnSaveDrive">Drive</button>
-      <button class="btn small ghost" id="btnOpenSettings" aria-label="Configuración">?</button>
+      <button class="btn small ghost" id="btnOpenSettings" aria-label="Configuracion" title="Configuracion"><svg class="settings-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13.5c.1-.5.1-1 .1-1.5s0-1-.1-1.5l2-1.5-2-3.5-2.4 1a8 8 0 0 0-2.6-1.5L14 2h-4l-.4 3a8 8 0 0 0-2.6 1.5l-2.4-1-2 3.5 2 1.5A8.5 8.5 0 0 0 4.5 12c0 .5 0 1 .1 1.5l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 2.6 1.5l.4 3h4l.4-3a8 8 0 0 0 2.6-1.5l2.4 1 2-3.5-2-1.5ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"/></svg></button>
     </div>
   </header>
 
