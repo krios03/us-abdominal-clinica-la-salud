@@ -972,8 +972,12 @@ async function generatePdfBlob(){
   const sections=[
     ["Líquido Amniótico",data.liquido||""],["Placenta",data.placenta||""],["Cordón Umbilical",data.cordon||""],
     ["Observaciones",data.observaciones||""],["Firma medico",data.firma||""]
-  ];  const headerHeight=58+12+20+18*10+15,footerHeight=14,sectionGap=5,titleHeight=14,boxPadY=14,minBox=24;
-  const available=B-24-headerHeight-footerHeight;
+  ];  const footerHeight=14,minSectionGap=5,comfortableSectionGap=8,titleHeight=14,boxPadY=14,minBox=24;
+  let sectionGap=comfortableSectionGap;
+  const metaRows=10,minRowStep=18,comfortableRowStep=24,biometryTitleStep=15;
+  const fixedHeaderHeight=58+12+20+biometryTitleStep;
+  let rowStep=comfortableRowStep;
+  let available=B-24-fixedHeaderHeight-rowStep*metaRows-footerHeight;
   function measureLayout(fontSize){
     pdf.setFont("times","normal");pdf.setFontSize(fontSize);
     const lineHeight=fontSize+1.7;
@@ -986,6 +990,15 @@ async function generatePdfBlob(){
     return {fontSize,lineHeight,measured,total}
   }
   let layout=measureLayout(14);
+  if(layout.total>available){
+    const needed=layout.total-available;
+    rowStep=Math.max(minRowStep,comfortableRowStep-Math.ceil(needed/metaRows));
+    available=B-24-fixedHeaderHeight-rowStep*metaRows-footerHeight;
+  }
+  if(layout.total>available&&sectionGap>minSectionGap){
+    sectionGap=Math.max(minSectionGap,comfortableSectionGap-Math.ceil((layout.total-available)/sections.length));
+    layout=measureLayout(14);
+  }
   for(let size=13.5;layout.total>available&&size>=7;size-=.5)layout=measureLayout(size);
   const overflow=layout.total>available;
   if(overflow){
@@ -1006,18 +1019,18 @@ async function generatePdfBlob(){
     pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(12);
     const t=fitLine(pdf,value,(x+w)-lx-5);if(t)pdf.text(t,lx,y+11)
   };
-  lineField("Nombre",data.nombre,L,R-L);y+=18;
-  lineField("Fecha",data.fecha||"",L,R-L);y+=18;
-  lineField("Edad",data.edad||"",L,R-L);y+=18;
-  pdf.setTextColor(18,72,91);pdf.setFont("times","bold");pdf.setFontSize(12);pdf.text("Biometria",L,y+10);y+=15;
-  lineField("FCF",data.fcf||"",L,R-L);y+=18;
-  lineField("DBP",data.dbp||"",L,R-L);y+=18;
-  lineField("CC",data.cc||"",L,R-L);y+=18;
-  lineField("CA",data.ca||"",L,R-L);y+=18;
-  lineField("LF",data.lf||"",L,R-L);y+=18;
-  lineField("Peso",data.peso||"",L,R-L);y+=18;
-  lineField("Edad Gestacional",data.edad_gestacional||"",L,R-L);y+=18;
-  lineField("F.P.P.",data.fpp||"",L,R-L);y+=20;
+  lineField("Nombre",data.nombre,L,R-L);y+=rowStep;
+  lineField("Fecha",data.fecha||"",L,R-L);y+=rowStep;
+  lineField("Edad",data.edad||"",L,R-L);y+=rowStep;
+  pdf.setTextColor(18,72,91);pdf.setFont("times","bold");pdf.setFontSize(12);pdf.text("Biometria",L,y+10);y+=biometryTitleStep;
+  lineField("FCF",data.fcf||"",L,R-L);y+=rowStep;
+  lineField("DBP",data.dbp||"",L,R-L);y+=rowStep;
+  lineField("CC",data.cc||"",L,R-L);y+=rowStep;
+  lineField("CA",data.ca||"",L,R-L);y+=rowStep;
+  lineField("LF",data.lf||"",L,R-L);y+=rowStep;
+  lineField("Peso",data.peso||"",L,R-L);y+=rowStep;
+  lineField("Edad Gestacional",data.edad_gestacional||"",L,R-L);y+=rowStep;
+  lineField("F.P.P.",data.fpp||"",L,R-L);y+=rowStep;
   const drawBlock=(section)=>{
     const {title,lines,boxHeight}=section;
     if(title==="Firma medico"){
