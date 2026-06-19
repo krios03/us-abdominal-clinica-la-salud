@@ -42,7 +42,7 @@ input,textarea,button{-webkit-user-select:text;user-select:text}
 .report-container{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;background:#dce5e8;padding:6px}
 .report-page{width:100%;max-width:8.5in;background:#fff;margin:0 auto;padding:14px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-family:"Source Serif 4",serif;color:#111;border-radius:4px}
 .report-header{display:flex;align-items:center;gap:6px;margin-bottom:6px}
-.logo-box{width:50px;height:50px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.logo-box{width:56px;height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .logo-box:last-child{width:55px;height:50px}
 .logo-box img{max-width:100%;max-height:100%;object-fit:contain;object-position:center}
 .header-center{flex:1;text-align:center;line-height:1.15}
@@ -173,8 +173,9 @@ body.editing-transcript #btnConfirmTranscriptEdit{display:inline-flex}
 .sidebar{display:none}
 .pdf-only{position:fixed;left:-9999px;top:0;box-shadow:none;border-radius:0}
 .pdf-render{width:8.5in!important;min-height:11in!important;max-width:none!important;padding:.32in .3in!important;border-radius:0!important;box-shadow:none!important}
-.pdf-render .report-header{display:grid!important;grid-template-columns:100px 1fr 90px!important}
+.pdf-render .report-header{display:grid!important;grid-template-columns:108px 1fr 90px!important}
 .pdf-render .logo-box{width:90px!important;height:90px!important}
+.pdf-render .logo-box:first-child{width:98px!important;height:98px!important}
 .pdf-render .header-center h2{font-size:16px!important}
 .pdf-render .header-center p{font-size:12px!important}
 .pdf-render .section-title{font-size:20px!important}
@@ -205,8 +206,8 @@ body.keyboard-open .dictation-fab.visible{transform:translateY(-6px);min-height:
 .summary-row span:first-child{color:var(--muted)}
 .summary-row span:last-child{font-weight:700;text-align:right}
 .report-page{width:8.5in;min-height:11in;max-width:none;padding:.32in .3in;box-shadow:0 12px 22px rgba(0,0,0,.12);border-radius:0}
-.report-header{display:grid;grid-template-columns:100px 1fr 90px}
-.logo-box{width:90px;height:90px}
+.report-header{display:grid;grid-template-columns:108px 1fr 90px}
+.logo-box{width:98px;height:98px}
 .logo-box:last-child{width:110px;height:90px}
 .header-center h2{font-size:16px}
 .header-center p{font-size:12px}
@@ -1118,7 +1119,7 @@ async function generatePdfBlob(){
     const scale=available/layout.total;
     layout.measured.forEach(s=>{s.boxHeight=Math.max(minBox,Math.floor(s.boxHeight*scale))})
   }
-  if(lL)pdf.addImage(lL,"JPEG",L,y,46,46,undefined,"FAST");if(lR)pdf.addImage(lR,"JPEG",R-42,y,42,46,undefined,"FAST");
+  if(lL)pdf.addImage(lL,"JPEG",L,y,50,50,undefined,"FAST");if(lR)pdf.addImage(lR,"JPEG",R-42,y,42,46,undefined,"FAST");
   pdf.setTextColor(18,60,118);pdf.setFont("times","bold");pdf.setFontSize(15);pdf.text("Clínica Médica La Salud",pw/2,y+12,{align:"center"});
   pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(10);
   pdf.text("Médico Ultrasonografista: Dra. Mariana López",pw/2,y+26,{align:"center"});
