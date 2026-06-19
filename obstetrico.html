@@ -972,7 +972,7 @@ async function generatePdfBlob(){
   const sections=[
     ["Líquido Amniótico",data.liquido||""],["Placenta",data.placenta||""],["Cordón Umbilical",data.cordon||""],
     ["Observaciones",data.observaciones||""],["Firma medico",data.firma||""]
-  ];  const headerHeight=58+12+20+20+55,footerHeight=14,sectionGap=5,titleHeight=14,boxPadY=14,minBox=24;
+  ];  const headerHeight=58+12+20+18*10+15,footerHeight=14,sectionGap=5,titleHeight=14,boxPadY=14,minBox=24;
   const available=B-24-headerHeight-footerHeight;
   function measureLayout(fontSize){
     pdf.setFont("times","normal");pdf.setFontSize(fontSize);
@@ -1006,11 +1006,18 @@ async function generatePdfBlob(){
     pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(12);
     const t=fitLine(pdf,value,(x+w)-lx-5);if(t)pdf.text(t,lx,y+11)
   };
-  lineField("Nombre",data.nombre,L,R-L);y+=20;
-  lineField("Fecha",data.fecha||"",L,150);lineField("Edad",data.edad||"",L+165,100);y+=20;
-  pdf.setTextColor(18,72,91);pdf.setFont("times","bold");pdf.setFontSize(12);pdf.text("Biometría",L,y+10);y+=15;
-  lineField("FCF",data.fcf||"",L,120);lineField("DBP",data.dbp||"",L+132,120);lineField("CC",data.cc||"",L+264,120);lineField("CA",data.ca||"",L+396,120);y+=20;
-  lineField("LF",data.lf||"",L,120);lineField("Peso",data.peso||"",L+132,160);lineField("Edad Gest.",data.edad_gestacional||"",L+304,130);lineField("F.P.P.",data.fpp||"",L+446,100);y+=20;
+  lineField("Nombre",data.nombre,L,R-L);y+=18;
+  lineField("Fecha",data.fecha||"",L,R-L);y+=18;
+  lineField("Edad",data.edad||"",L,R-L);y+=18;
+  pdf.setTextColor(18,72,91);pdf.setFont("times","bold");pdf.setFontSize(12);pdf.text("Biometria",L,y+10);y+=15;
+  lineField("FCF",data.fcf||"",L,R-L);y+=18;
+  lineField("DBP",data.dbp||"",L,R-L);y+=18;
+  lineField("CC",data.cc||"",L,R-L);y+=18;
+  lineField("CA",data.ca||"",L,R-L);y+=18;
+  lineField("LF",data.lf||"",L,R-L);y+=18;
+  lineField("Peso",data.peso||"",L,R-L);y+=18;
+  lineField("Edad Gestacional",data.edad_gestacional||"",L,R-L);y+=18;
+  lineField("F.P.P.",data.fpp||"",L,R-L);y+=20;
   const drawBlock=(section)=>{
     const {title,lines,boxHeight}=section;
     if(title==="Firma medico"){
