@@ -1073,7 +1073,10 @@ async function generatePdfBlob(){
   const drawBlock=(section)=>{
     const {title,lines,boxHeight}=section;
     if(title==="Firma médico"){
-      const lineW=Math.min(230,contentW*.46),x=R-lineW,top=y+8;
+      const lineW=Math.min(230,contentW*.46),x=R-lineW;
+      const signatureHeight=38,desiredGap=20;
+      const availableGap=Math.max(0,B-y-signatureHeight);
+      const top=y+Math.min(desiredGap,availableGap);
       pdf.setDrawColor(58,72,80);pdf.setLineWidth(.7);pdf.line(x,top+18,R,top+18);
       pdf.setTextColor(72,96,107);pdf.setFont("times","bold");pdf.setFontSize(9.5);pdf.text("Firma médico",x+lineW/2,top+31,{align:"center"});
       pdf.setTextColor(17,17,17);pdf.setFont("times","italic");pdf.setFontSize(Math.min(12,layout.fontSize));
