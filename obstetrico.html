@@ -976,7 +976,7 @@ async function generatePdfBlob(){
     ["Observaciones",data.observaciones||""],["Firma médico",data.firma||""]
   ];  const footerHeight=14,minSectionGap=5,comfortableSectionGap=8,titleHeight=14,boxPadY=14,minBox=24;
   let sectionGap=comfortableSectionGap;
-  const metaRows=10,minRowStep=18,comfortableRowStep=24,biometryTitleStep=15;
+  const metaRows=10,minRowStep=20,comfortableRowStep=26,biometryTitleStep=15;
   const fixedHeaderHeight=58+12+20+biometryTitleStep;
   let rowStep=comfortableRowStep;
   let available=B-24-fixedHeaderHeight-rowStep*metaRows-footerHeight;
@@ -991,7 +991,7 @@ async function generatePdfBlob(){
     const total=measured.reduce((sum,s)=>sum+titleHeight+s.boxHeight+sectionGap,0);
     return {fontSize,lineHeight,measured,total}
   }
-  let layout=measureLayout(14);
+  let layout=measureLayout(15);
   if(layout.total>available){
     const needed=layout.total-available;
     rowStep=Math.max(minRowStep,comfortableRowStep-Math.ceil(needed/metaRows));
@@ -999,9 +999,9 @@ async function generatePdfBlob(){
   }
   if(layout.total>available&&sectionGap>minSectionGap){
     sectionGap=Math.max(minSectionGap,comfortableSectionGap-Math.ceil((layout.total-available)/sections.length));
-    layout=measureLayout(14);
+    layout=measureLayout(15);
   }
-  for(let size=13.5;layout.total>available&&size>=7;size-=.5)layout=measureLayout(size);
+  for(let size=14.5;layout.total>available&&size>=8;size-=.5)layout=measureLayout(size);
   const overflow=layout.total>available;
   if(overflow){
     const scale=available/layout.total;
@@ -1015,11 +1015,12 @@ async function generatePdfBlob(){
   pdf.setDrawColor(184,211,222);pdf.setLineWidth(.8);pdf.line(L,y+51,R,y+51);
   y+=58;pdf.setFont("times","bold");pdf.setFontSize(15);pdf.text("Reporte de Ultrasonido Obstétrico",pw/2,y,{align:"center"});y+=12;
   const lineField=(label,value,x,w)=>{
-    pdf.setFillColor(247,251,253);pdf.setDrawColor(203,220,227);pdf.roundedRect(x,y,w,16,2,2,"FD");
-    pdf.setTextColor(18,72,91);pdf.setFont("times","bold");pdf.setFontSize(9.5);pdf.text(`${label}:`,x+5,y+11);
+    const fieldBoxHeight=Math.max(18,layout.fontSize+5),textY=y+fieldBoxHeight-5;
+    pdf.setFillColor(247,251,253);pdf.setDrawColor(203,220,227);pdf.roundedRect(x,y,w,fieldBoxHeight,2,2,"FD");
+    pdf.setTextColor(18,72,91);pdf.setFont("times","bold");pdf.setFontSize(9.5);pdf.text(`${label}:`,x+5,textY);
     const labelW=pdf.getTextWidth(`${label}: `),lx=x+labelW+8;
-    pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(12);
-    const t=fitLine(pdf,value,(x+w)-lx-5);if(t)pdf.text(t,lx,y+11)
+    pdf.setTextColor(17,17,17);pdf.setFont("times","normal");pdf.setFontSize(layout.fontSize);
+    const t=fitLine(pdf,value,(x+w)-lx-5);if(t)pdf.text(t,lx,textY)
   };
   lineField("Nombre",data.nombre,L,R-L);y+=rowStep;
   lineField("Fecha",data.fecha||"",L,R-L);y+=rowStep;
@@ -1031,16 +1032,18 @@ async function generatePdfBlob(){
   lineField("CA",data.ca||"",L,R-L);y+=rowStep;
   lineField("LF",data.lf||"",L,R-L);y+=rowStep;
   lineField("Peso",data.peso||"",L,R-L);y+=rowStep;
-  lineField("Edad Gestacional",data.edad_gestacional||"",L,R-L);y+=rowStep;
-  lineField("F.P.P.",data.fpp||"",L,R-L);y+=rowStep;
   const drawBlock=(section)=>{
     const {title,lines,boxHeight}=section;
     if(title==="Firma médico"){
-      const lineW=Math.min(230,contentW*.46),x=R-lineW;
       const signatureHeight=38,top=B-signatureHeight;
+      const bottomFieldsTop=Math.max(y,top-rowStep*2-4);
+      y=bottomFieldsTop;
+      lineField("Edad Gestacional",data.edad_gestacional||"",L,R-L);y+=rowStep;
+      lineField("F.P.P.",data.fpp||"",L,R-L);y+=rowStep;
+      const lineW=Math.min(230,contentW*.46),x=R-lineW;
       pdf.setDrawColor(58,72,80);pdf.setLineWidth(.7);pdf.line(x,top+18,R,top+18);
       pdf.setTextColor(72,96,107);pdf.setFont("times","bold");pdf.setFontSize(9.5);pdf.text("Firma médico",x+lineW/2,top+31,{align:"center"});
-      pdf.setTextColor(17,17,17);pdf.setFont("times","italic");pdf.setFontSize(Math.min(12,layout.fontSize));
+      pdf.setTextColor(17,17,17);pdf.setFont("times","italic");pdf.setFontSize(layout.fontSize);
       const t=fitLine(pdf,lines.join(" "),lineW-8);if(t)pdf.text(t,x+lineW/2,top+13,{align:"center"});
       y=top+38;return
     }
